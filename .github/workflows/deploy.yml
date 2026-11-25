@@ -4,7 +4,14 @@ name: Publicar en GitHub Pages
 on:
   push:
     branches: [main]
+  # Botón "Run workflow" en la pestaña Actions
   workflow_dispatch:
+  # Botón "Actualizar sitio" en la hoja de pedidos
+  repository_dispatch:
+    types: [sheet-updated]
+  # Todos los días a las 6:00 hora de Nicaragua (12:00 UTC), para tomar precios nuevos de la hoja
+  schedule:
+    - cron: '0 12 * * *'
 
 permissions:
   contents: read
@@ -31,6 +38,8 @@ jobs:
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # URL del Apps Script de la hoja de pedidos (Settings → Secrets and variables → Actions → Variables)
+          SHEET_API_URL: ${{ vars.SHEET_API_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

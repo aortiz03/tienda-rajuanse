@@ -47,11 +47,11 @@ export const prices: Record<'silent-sunrise' | 'family-reserve', Partial<Record<
 };
 
 // Etiquetas de tamaño (métrico + imperial)
-export const sizes: Record<SizeId, { label: string; imperial: string }> = {
-  '340g': { label: '340 g', imperial: '12 oz' },
-  '500g': { label: '500 g', imperial: '1.1 lb' },
-  '1kg': { label: '1 kg', imperial: '2.2 lb' },
-  '2.5kg': { label: '2.5 kg', imperial: '5.5 lb' },
+export const sizes: Record<SizeId, { label: string; imperial: string; grams: number }> = {
+  '340g': { label: '340 g', imperial: '12 oz', grams: 340 },
+  '500g': { label: '500 g', imperial: '1.1 lb', grams: 500 },
+  '1kg': { label: '1 kg', imperial: '2.2 lb', grams: 1000 },
+  '2.5kg': { label: '2.5 kg', imperial: '5.5 lb', grams: 2500 },
 };
 
 // Si los precios incluyen IVA (15 %). PLACEHOLDER: por confirmar.
@@ -84,6 +84,8 @@ type Text = { es: string; en: string };
 
 export type Product = {
   slug: string;
+  // Código del café en la hoja de pedidos (SKU = código-gramos-GR/MO, p. ej. SS-MED-340-GR)
+  code: string;
   line: LineId;
   name: string; // nombre del café (sin la línea)
   variety: string;
@@ -106,6 +108,7 @@ const FR_SIZES: SizeId[] = ['340g', '500g', '1kg'];
 export const products: Product[] = [
   {
     slug: 'silent-sunrise-medio',
+    code: 'SS-MED',
     line: 'silent-sunrise',
     name: 'Tueste medio',
     variety: 'Blend',
@@ -121,6 +124,7 @@ export const products: Product[] = [
   },
   {
     slug: 'silent-sunrise-oscuro',
+    code: 'SS-OSC',
     line: 'silent-sunrise',
     name: 'Tueste oscuro',
     variety: 'Blend',
@@ -136,6 +140,7 @@ export const products: Product[] = [
   },
   {
     slug: 'mariana-maceracion-carbonica',
+    code: 'FR-MMC',
     line: 'family-reserve',
     name: 'Mariana Maceración Carbónica',
     variety: 'Mariana',
@@ -151,6 +156,7 @@ export const products: Product[] = [
   },
   {
     slug: 'mariana-natural',
+    code: 'FR-MNA',
     line: 'family-reserve',
     name: 'Mariana Natural',
     variety: 'Mariana',
@@ -166,6 +172,7 @@ export const products: Product[] = [
   },
   {
     slug: 'pacamara-lavado',
+    code: 'FR-PCL',
     line: 'family-reserve',
     name: 'Pacamara Lavado',
     variety: 'Pacamara',
@@ -181,6 +188,7 @@ export const products: Product[] = [
   },
   {
     slug: 'parainema-natural',
+    code: 'FR-PRN',
     line: 'family-reserve',
     name: 'Parainema Natural',
     variety: 'Parainema',
@@ -196,6 +204,7 @@ export const products: Product[] = [
   },
   {
     slug: 'marsellesa-natural',
+    code: 'FR-MSN',
     line: 'family-reserve',
     name: 'Marsellesa Natural',
     variety: 'Marsellesa',
@@ -211,6 +220,7 @@ export const products: Product[] = [
   },
   {
     slug: 'h1-natural',
+    code: 'FR-H1N',
     line: 'family-reserve',
     name: 'H1 Natural',
     variety: 'H1',
@@ -234,8 +244,9 @@ export const shippingZones = [
 ];
 
 export const paymentMethods = [
-  { id: 'transfer', es: 'Transferencia bancaria', en: 'Bank transfer' },
-  { id: 'cash', es: 'Efectivo contra entrega (sólo Managua)', en: 'Cash on delivery (Managua only)' },
+  // Los id coinciden con la lista "payment_method" de la hoja de pedidos.
+  { id: 'transferencia', es: 'Transferencia bancaria', en: 'Bank transfer' },
+  { id: 'efectivo', es: 'Efectivo contra entrega (sólo Managua)', en: 'Cash on delivery (Managua only)' },
   { id: 'paypal', es: 'PayPal (pedidos internacionales)', en: 'PayPal (international orders)' },
 ];
 

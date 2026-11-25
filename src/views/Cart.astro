@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import { products, lines, prices, sizes, shippingZones, paymentMethods, contact, pricesIncludeIVA } from '../data/shop';
+import { products, lines, sizes, shippingZones, paymentMethods, contact, pricesIncludeIVA } from '../data/shop';
+import { activeVariants, sheetUrl } from '../data/catalog';
 import { type Lang, t as tr, url, ui, asset } from '../i18n/ui';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -15,12 +16,13 @@ const catalog = Object.fromEntries(
       name: `${lines[p.line].name} · ${p.name}`,
       image: asset(p.image),
       url: url(lang, 'product', p.slug),
-      prices: prices[p.line],
+      variants: Object.fromEntries(activeVariants(p).map((v) => [`${v.size}|${v.grind}`, { sku: v.sku, nio: v.nio, usd: v.usd }])),
     },
   ]),
 );
 const config = {
   lang,
+  orderEndpoint: sheetUrl,
   whatsapp: contact.whatsapp,
   email: contact.email,
   sizes,
@@ -76,6 +78,7 @@ const config = {
             <button class="btn btn-primary" type="submit" data-via="whatsapp">{t('checkout.whatsapp')}</button>
             <button class="btn btn-outline" type="submit" data-via="email">{t('checkout.email.send')}</button>
           </div>
+          <p class="sent" data-sent hidden role="status">{t('order.sent')} <strong data-ref></strong>. {t('order.sentNote')}</p>
           <p class="small safety">🔒 {t('checkout.safety')}</p>
         </form>
       </div>
@@ -220,6 +223,15 @@ const config = {
     flex-direction: column;
     gap: 0.6rem;
     margin-top: 1rem;
+  }
+  .sent {
+    margin-top: 1rem;
+    background: var(--cream);
+    border-left: 4px solid var(--olive);
+    padding: 0.8em 1em;
+  }
+  .sent[hidden] {
+    display: none;
   }
   .safety {
     margin-top: 1rem;
