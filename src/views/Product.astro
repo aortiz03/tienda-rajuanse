@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import Price from '../components/Price.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { type Product, lines, prices, sizes, products, pricesIncludeIVA } from '../data/shop';
-import { type Lang, t as tr, url } from '../i18n/ui';
+import { type Lang, t as tr, url, asset } from '../i18n/ui';
 interface Props { lang: Lang; product: Product }
 const { lang, product: p } = Astro.props;
 const t = tr(lang);
@@ -24,7 +24,7 @@ const facts: [string, string | null][] = [
   [t('product.roastDate'), null],
 ];
 ---
-<Base lang={lang} title={title} route="product" slug={p.slug} image={p.image} description={p.intro[lang]}>
+<Base lang={lang} title={title} route="product" slug={p.slug} image={asset(p.image)} description={p.intro[lang]}>
   <section class="section top">
     <div class="wrap">
       <nav class="crumbs" aria-label="breadcrumb">
@@ -33,7 +33,7 @@ const facts: [string, string | null][] = [
       <div class="layout">
         <div class="gallery">
           <div class="main-img">
-            <img src={p.image} alt={title} width="1000" height="1000" />
+            <img src={asset(p.image)} alt={title} width="1000" height="1000" />
           </div>
         </div>
 

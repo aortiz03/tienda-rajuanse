@@ -161,8 +161,15 @@ export function t(lang: Lang) {
   return (key: UIKey) => ui[lang][key];
 }
 
+// Prefijo de la dirección (vacío en un dominio propio; '/tienda-rajuanse' en GitHub Pages).
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+export function asset(path: string) {
+  return BASE + path;
+}
+
 export function url(lang: Lang, key: RouteKey, slug = '') {
-  return routes[key][lang] + (slug ? slug + '/' : '');
+  return BASE + routes[key][lang] + (slug ? slug + '/' : '');
 }
 
 export function otherLang(lang: Lang): Lang {

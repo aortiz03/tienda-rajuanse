@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { products, lines, prices, sizes, shippingZones, paymentMethods, contact, pricesIncludeIVA } from '../data/shop';
-import { type Lang, t as tr, url, ui } from '../i18n/ui';
+import { type Lang, t as tr, url, ui, asset } from '../i18n/ui';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = tr(lang);
@@ -13,7 +13,7 @@ const catalog = Object.fromEntries(
     p.slug,
     {
       name: `${lines[p.line].name} · ${p.name}`,
-      image: p.image,
+      image: asset(p.image),
       url: url(lang, 'product', p.slug),
       prices: prices[p.line],
     },

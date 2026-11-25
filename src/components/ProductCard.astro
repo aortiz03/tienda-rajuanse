@@ -1,7 +1,7 @@
 ---
 import Price from './Price.astro';
 import { type Product, lines, prices } from '../data/shop';
-import { type Lang, t as tr, url } from '../i18n/ui';
+import { type Lang, t as tr, url, asset } from '../i18n/ui';
 interface Props { product: Product; lang: Lang }
 const { product: p, lang } = Astro.props;
 const t = tr(lang);
@@ -9,7 +9,7 @@ const first = prices[p.line][p.sizes[0]]!;
 ---
 <article class="card">
   <a href={url(lang, 'product', p.slug)} class="img">
-    <img src={p.image} alt={`${lines[p.line].name} ${p.name}`} width="1000" height="1000" loading="lazy" />
+    <img src={asset(p.image)} alt={`${lines[p.line].name} ${p.name}`} width="1000" height="1000" loading="lazy" />
   </a>
   <div class="body">
     <p class="line">{lines[p.line].name}</p>
