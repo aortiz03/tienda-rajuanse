@@ -1,0 +1,7 @@
+---
+// Muestra el precio en córdobas y en dólares; el CSS oculta la moneda no elegida.
+interface Props { nio: number; usd: number; prefix?: string }
+const { nio, usd, prefix } = Astro.props;
+const fmt = (n: number) => n.toLocaleString('en-US');
+---
+<span class="price">{prefix && <span class="price-prefix">{prefix} </span>}<span data-c="nio">C$ {fmt(nio)}</span><span data-c="usd">US$ {fmt(usd)}</span></span>

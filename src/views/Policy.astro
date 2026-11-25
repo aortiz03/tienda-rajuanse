@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import { policies, renderPolicy, type PolicyKey } from '../data/policies';
+import { type Lang, url } from '../i18n/ui';
+interface Props { lang: Lang; kind: PolicyKey }
+const { lang, kind } = Astro.props;
+const p = policies[kind][lang];
+const es = lang === 'es';
+const all: PolicyKey[] = ['shipping', 'returns', 'payments', 'privacy', 'terms'];
+---
+<Base lang={lang} title={p.title} route={kind}>
+  <section class="section">
+    <div class="wrap layout">
+      <nav class="side" aria-label={es ? 'Políticas' : 'Policies'}>
+        <p class="eyebrow">{es ? 'Políticas de la tienda' : 'Shop policies'}</p>
+        <ul>
+          {all.map((k) => (
+            <li><a href={url(lang, k)} aria-current={k === kind ? 'page' : undefined}>{policies[k][lang].title}</a></li>
+          ))}
+        </ul>
+      </nav>
+      <article class="prose">
+        <h1>{p.title}</h1>
+        <p class="notice">
+          {es
+            ? 'Borrador: los valores resaltados están por confirmar y el texto está pendiente de revisión legal.'
+            : 'Draft: highlighted values are still to be confirmed and the text is pending legal review.'}
+        </p>
+        <Fragment set:html={renderPolicy(p.body)} />
+      </article>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: clamp(24px, 5vw, 64px);
+    align-items: start;
+  }
+  .side ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .side li {
+    margin-bottom: 0.5rem;
+  }
+  .side a {
+    text-decoration: none;
+  }
+  .side a[aria-current='page'] {
+    font-weight: 600;
+    box-shadow: inset 0 -2px 0 var(--orange);
+  }
+  @media (max-width: 760px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+    .side ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 1.2rem;
+    }
+  }
+</style>

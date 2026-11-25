@@ -1,0 +1,186 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { products, lines } from '../data/shop';
+import { type Lang, t as tr, url } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = tr(lang);
+const es = lang === 'es';
+const ss = products.filter((p) => p.line === 'silent-sunrise');
+const fr = products.filter((p) => p.line === 'family-reserve');
+---
+<Base lang={lang} title="" route="home">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">{t('home.eyebrow')}</p>
+        <h1>{t('home.title')}</h1>
+        <p class="lead">{t('home.lead')}</p>
+        <div class="actions">
+          <a class="btn btn-primary" href={url(lang, 'shop')}>{t('home.cta')}</a>
+          <a class="btn btn-outline" href={url(lang, 'about')}>{t('nav.about')}</a>
+        </div>
+        <div class="badges">
+          <span class="badge">{t('badge.ra')}</span>
+          <span class="badge">{t('badge.origin')}</span>
+        </div>
+      </div>
+      <div class="hero-img">
+        <img src="/images/products/family-reserve-pacamara-lavado.webp" alt="Family Reserve Pacamara Lavado" width="1000" height="1000" fetchpriority="high" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-tan">
+    <div class="wrap">
+      <p class="eyebrow">{t('home.lines')}</p>
+      <div class="lines">
+        {[{ id: 'silent-sunrise', items: ss }, { id: 'family-reserve', items: fr }].map(({ id, items }) => {
+          const l = lines[id as keyof typeof lines];
+          return (
+            <div class="line-block">
+              <h2>{l.name}</h2>
+              <p class="line-tag">{l.tagline[lang]}</p>
+              <p>{l.description[lang]}</p>
+              <p class="line-meta">
+                {id === 'silent-sunrise'
+                  ? (es ? 'Tueste medio u oscuro · 340 g, 500 g, 1 kg y 2.5 kg' : 'Medium or dark roast · 340 g, 500 g, 1 kg and 2.5 kg')
+                  : (es ? `${items.length} cafés · Tueste medio · 340 g, 500 g y 1 kg` : `${items.length} coffees · Medium roast · 340 g, 500 g and 1 kg`)}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="head-row">
+        <h2>Family Reserve</h2>
+        <a href={url(lang, 'shop')}>{es ? 'Ver toda la tienda' : 'See the whole shop'} →</a>
+      </div>
+      <div class="grid">
+        {fr.map((p) => <ProductCard product={p} lang={lang} />)}
+      </div>
+      <div class="head-row second">
+        <h2>Silent Sunrise</h2>
+      </div>
+      <div class="grid">
+        {ss.map((p) => <ProductCard product={p} lang={lang} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-green">
+    <div class="wrap">
+      <p class="eyebrow light">{t('home.values.title')}</p>
+      <div class="values">
+        {[1, 2, 3].map((n) => (
+          <div>
+            <h3>{t(`home.values.${n}.t` as any)}</h3>
+            <p>{t(`home.values.${n}.d` as any)}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding: clamp(32px, 6vw, 80px) 0;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(24px, 5vw, 64px);
+    align-items: center;
+  }
+  .lead {
+    font-size: 1.2rem;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin: 1.6rem 0;
+  }
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .hero-img {
+    background: var(--tan);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 20px 40px -24px rgba(53, 67, 42, 0.45);
+    max-width: 480px;
+    justify-self: center;
+    width: 100%;
+  }
+  .lines {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(24px, 5vw, 64px);
+  }
+  .line-tag {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--rust);
+  }
+  .line-meta {
+    font-family: var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .head-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .head-row a {
+    font-family: var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .head-row.second {
+    margin-top: 4rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 2rem 1.5rem;
+  }
+  .values {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .light {
+    color: var(--tan);
+  }
+  @media (max-width: 760px) {
+    .hero-grid,
+    .lines,
+    .values {
+      grid-template-columns: 1fr;
+    }
+    .hero-img {
+      max-width: 340px;
+    }
+    .grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem 1rem;
+    }
+  }
+</style>

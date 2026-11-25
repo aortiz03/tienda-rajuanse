@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import Stamp from '../components/Stamp.astro';
+import { type Lang, url } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const es = lang === 'es';
+---
+<Base lang={lang} title={es ? 'Nuestra historia' : 'Our story'} route="about">
+  <section class="section">
+    <div class="wrap layout">
+      <div class="prose">
+        <p class="eyebrow">RAJUANSE Estates · Hacienda Buena Esperanza</p>
+        <h1>{es ? 'Nuestra comunidad es nuestra familia' : 'Our community is our family'}</h1>
+        {es ? (
+          <>
+            <p>RAJUANSE comenzó como un proyecto familiar en la Hacienda Buena Esperanza, en las montañas de Matagalpa, Nicaragua. Con los años se convirtió en un productor de café de especialidad enfocado en la calidad y la sostenibilidad.</p>
+            <p>Hasta hoy vendíamos nuestro café verde, Rainforest Alliance Certified, a tostadores y compradores de especialidad. Esta tienda es nuestro primer paso para llevarlo tostado directamente a tu casa.</p>
+            <h2>Lo que nos guía</h2>
+            <ul>
+              <li><strong>Sostenibilidad:</strong> cuidamos el bosque, el suelo y el agua de la finca.</li>
+              <li><strong>Respeto por la naturaleza y las personas</strong> que hacen posible cada cosecha.</li>
+              <li><strong>Integridad y trazabilidad</strong> de la semilla a la taza.</li>
+              <li><strong>Crecimiento de la comunidad,</strong> con énfasis en la educación y el liderazgo de las mujeres.</li>
+            </ul>
+            <p>Arraigados en la tradición, creciendo hacia el futuro.</p>
+          </>
+        ) : (
+          <>
+            <p>RAJUANSE began as a family endeavor at Hacienda Buena Esperanza, in the mountains of Matagalpa, Nicaragua. Over the years it grew into a quality-focused, sustainable specialty coffee producer.</p>
+            <p>Until now we sold our Rainforest Alliance Certified green coffee to roasters and specialty buyers. This shop is our first step in bringing it, roasted, straight to your home.</p>
+            <h2>What guides us</h2>
+            <ul>
+              <li><strong>Sustainability:</strong> we look after the forest, soil and water on the farm.</li>
+              <li><strong>Respect for nature and for the people</strong> who make every harvest possible.</li>
+              <li><strong>Integrity and traceability</strong> from seed to cup.</li>
+              <li><strong>Community growth,</strong> with a focus on education and women’s empowerment.</li>
+            </ul>
+            <p>Rooted in tradition, growing towards the future.</p>
+          </>
+        )}
+        <p><a class="btn btn-primary" href={url(lang, 'shop')}>{es ? 'Ver los cafés' : 'Shop the coffees'}</a></p>
+      </div>
+      <div class="aside">
+        <Stamp size={220} />
+        <p class="quote">“{es ? 'Café superior, cultivado con conciencia.' : 'Crafting superior coffee with a conscience.'}”</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: clamp(24px, 5vw, 64px);
+    align-items: center;
+  }
+  .aside {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: var(--tan);
+    border-radius: 999px 999px var(--radius) var(--radius);
+    padding: 3rem 1.5rem 2rem;
+  }
+  .quote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.4rem;
+    margin-top: 1.5rem;
+  }
+  @media (max-width: 760px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+    .aside :global(svg) {
+      width: 140px;
+      height: 140px;
+    }
+  }
+</style>

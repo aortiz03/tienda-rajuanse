@@ -1,0 +1,78 @@
+---
+import '@fontsource/playfair-display/400.css';
+import '@fontsource/playfair-display/500.css';
+import '@fontsource/playfair-display/400-italic.css';
+import '@fontsource/barlow/400.css';
+import '@fontsource/barlow/500.css';
+import '@fontsource/barlow-condensed/500.css';
+import '@fontsource/barlow-condensed/600.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { type Lang, type RouteKey, url, otherLang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description?: string;
+  route: RouteKey;
+  slug?: string;
+  image?: string;
+}
+const { lang, title, description, route, slug = '', image } = Astro.props;
+const alt = otherLang(lang);
+const here = url(lang, route, slug);
+const there = url(alt, route, slug);
+const fullTitle = title ? `${title} · RAJUANSE` : 'RAJUANSE · Café de Matagalpa, Nicaragua';
+const desc =
+  description ??
+  (lang === 'es'
+    ? 'Café tostado de la Hacienda Buena Esperanza, Matagalpa, Nicaragua. Rainforest Alliance Certified.'
+    : 'Roasted coffee from Hacienda Buena Esperanza, Matagalpa, Nicaragua. Rainforest Alliance Certified.');
+const site = Astro.site ?? new URL('https://tienda.rajuanse.com');
+---
+<!doctype html>
+<html lang={lang} data-cur={lang === 'es' ? 'nio' : 'usd'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={new URL(here, site)} />
+    <link rel="alternate" hreflang={lang} href={new URL(here, site)} />
+    <link rel="alternate" hreflang={alt} href={new URL(there, site)} />
+    <link rel="alternate" hreflang="x-default" href={new URL(url('es', route, slug), site)} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={desc} />
+    {image && <meta property="og:image" content={new URL(image, site)} />}
+    <meta name="theme-color" content="#4a5935" />
+    <script is:inline define:vars={{ lang, there }}>
+      // 1) Idioma: si el visitante usa inglés de EE. UU. y nunca eligió idioma, mostrar la versión en inglés.
+      // 2) Moneda: recordar C$ o US$ según la elección del visitante.
+      try {
+        var chosen = localStorage.getItem('rj-lang');
+        if (!chosen && lang === 'es') {
+          var langs = navigator.languages || [navigator.language || ''];
+          var first = (langs[0] || '').toLowerCase();
+          if (first === 'en-us' || first === 'en') {
+            location.replace(there);
+          }
+        }
+        var cur = localStorage.getItem('rj-cur');
+        if (cur === 'nio' || cur === 'usd') document.documentElement.dataset.cur = cur;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <a class="sr-only" href="#main">{lang === 'es' ? 'Ir al contenido' : 'Skip to content'}</a>
+    <Header lang={lang} there={there} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <script>
+      import '../scripts/site.ts';
+    </script>
+  </body>
+</html>
