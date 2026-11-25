@@ -2,11 +2,12 @@
 import Base from '../layouts/Base.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { products, lines, pricesIncludeIVA } from '../data/shop';
+import { isAvailable } from '../data/catalog';
 import { type Lang, t as tr } from '../i18n/ui';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = tr(lang);
-const groups = (['family-reserve', 'silent-sunrise'] as const).map((id) => ({ id, items: products.filter((p) => p.line === id) }));
+const groups = (['family-reserve', 'silent-sunrise'] as const).map((id) => ({ id, items: products.filter((p) => p.line === id && isAvailable(p)) })).filter((g) => g.items.length > 0);
 ---
 <Base lang={lang} title="" route="shop">
   <section class="section">

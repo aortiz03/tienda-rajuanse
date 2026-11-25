@@ -2,7 +2,8 @@
 import Base from '../layouts/Base.astro';
 import Price from '../components/Price.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { type Product, lines, prices, sizes, products, pricesIncludeIVA } from '../data/shop';
+import { type Product, lines, sizes, products, pricesIncludeIVA } from '../data/shop';
+import { activeVariants, isAvailable } from '../data/catalog';
 import { type Lang, t as tr, url, asset } from '../i18n/ui';
 interface Props { lang: Lang; product: Product }
 const { lang, product: p } = Astro.props;
@@ -10,7 +11,11 @@ const t = tr(lang);
 const es = lang === 'es';
 const line = lines[p.line];
 const title = `${line.name} · ${p.name}`;
-const related = products.filter((x) => x.line === p.line && x.slug !== p.slug).slice(0, 3);
+const related = products.filter((x) => x.line === p.line && x.slug !== p.slug && isAvailable(x)).slice(0, 3);
+const variants = activeVariants(p);
+const sizeIds = p.sizes.filter((s) => variants.some((v) => v.size === s));
+const firstV = variants[0];
+const combos = variants.map((v) => `${v.size}|${v.grind}`);
 const tbc = t('tbc');
 const facts: [string, string | null][] = [
   [t('product.variety'), p.variety],
@@ -49,13 +54,16 @@ const facts: [string, string | null][] = [
             <span class="badge">{t('badge.trace')}</span>
           </div>
 
-          <form class="buy" data-add-to-cart={p.slug}>
+          {variants.length === 0 ? (
+            <p class="soldout">{es ? 'Agotado por ahora.' : 'Sold out for now.'}</p>
+          ) : (
+          <form class="buy" data-add-to-cart={p.slug} data-combos={JSON.stringify(combos)}>
             <fieldset>
               <legend>{t('product.size')}</legend>
               <div class="pills">
-                {p.sizes.map((s, i) => (
+                {sizeIds.map((s) => (
                   <label class="pill">
-                    <input type="radio" name="size" value={s} checked={i === 0} />
+                    <input type="radio" name="size" value={s} checked={s === firstV.size} />
                     <span>{sizes[s].label}<small>{sizes[s].imperial}</small></span>
                   </label>
                 ))}
@@ -64,16 +72,15 @@ const facts: [string, string | null][] = [
             <fieldset>
               <legend>{t('product.grind')}</legend>
               <div class="pills">
-                <label class="pill"><input type="radio" name="grind" value="whole" checked /><span>{t('product.grind.whole')}</span></label>
-                <label class="pill"><input type="radio" name="grind" value="ground" /><span>{t('product.grind.ground')}</span></label>
+                <label class="pill"><input type="radio" name="grind" value="whole" checked={firstV.grind === 'whole'} /><span>{t('product.grind.whole')}</span></label>
+                <label class="pill"><input type="radio" name="grind" value="ground" checked={firstV.grind === 'ground'} /><span>{t('product.grind.ground')}</span></label>
               </div>
             </fieldset>
 
             <div class="price-big">
-              {p.sizes.map((s) => {
-                const pr = prices[p.line][s]!;
-                return <span data-size-price={s}><Price nio={pr.nio} usd={pr.usd} /></span>;
-              })}
+              {variants.map((v) => (
+                <span data-size-price={`${v.size}|${v.grind}`} hidden={v !== firstV}><Price nio={v.nio} usd={v.usd} /></span>
+              ))}
               <span class="tbc">{tbc}</span>
             </div>
             <p class="small">{pricesIncludeIVA && es ? t('priceNote.iva') + ' ' : ''}{t('priceNote.placeholder')}</p>
@@ -89,6 +96,7 @@ const facts: [string, string | null][] = [
               ✓ {t('product.added')} · <a href={url(lang, 'cart')}>{t('nav.cart')} →</a>
             </p>
           </form>
+          )}
 
           <div class="delivery">
             <p>{t('product.delivery')} <a href={url(lang, 'shipping')}>{es ? 'Envíos' : 'Shipping'}</a> · <a href={url(lang, 'returns')}>{es ? 'Devoluciones' : 'Returns'}</a></p>
@@ -108,7 +116,7 @@ const facts: [string, string | null][] = [
               <div><dt>{k}</dt><dd>{v ?? <span class="tbc">{tbc}</span>}</dd></div>
             ))}
             <div><dt>{t('product.grind')}</dt><dd>{t('product.grind.whole')} · {t('product.grind.ground')}</dd></div>
-            <div><dt>{t('product.size')}</dt><dd>{p.sizes.map((s) => `${sizes[s].label} (${sizes[s].imperial})`).join(' · ')}</dd></div>
+            <div><dt>{t('product.size')}</dt><dd>{(sizeIds.length ? sizeIds : p.sizes).map((s) => `${sizes[s].label} (${sizes[s].imperial})`).join(' · ')}</dd></div>
           </dl>
         </div>
       </div>
@@ -218,6 +226,16 @@ const facts: [string, string | null][] = [
   .pill small {
     font-size: 0.75rem;
     opacity: 0.75;
+  }
+  .pill input:disabled + span {
+    opacity: 0.4;
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+  .soldout {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--rust);
   }
   .pill input:checked + span {
     background: var(--olive);

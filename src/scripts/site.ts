@@ -42,9 +42,19 @@ window.addEventListener('storage', updateCount);
 // Formularios "Agregar al carrito"
 document.querySelectorAll<HTMLFormElement>('form[data-add-to-cart]').forEach((form) => {
   const priceEls = form.querySelectorAll<HTMLElement>('[data-size-price]');
+  // Combinaciones tamaño|molienda disponibles (según la hoja de pedidos)
+  const combos: string[] = JSON.parse(form.dataset.combos || '[]');
+  const grindInputs = form.querySelectorAll<HTMLInputElement>('input[name=grind]');
   const sync = () => {
     const size = (new FormData(form).get('size') as string) || '';
-    priceEls.forEach((el) => (el.hidden = el.dataset.sizePrice !== size));
+    grindInputs.forEach((g) => (g.disabled = !combos.includes(`${size}|${g.value}`)));
+    const checked = form.querySelector<HTMLInputElement>('input[name=grind]:checked');
+    if (!checked || checked.disabled) {
+      const firstOk = Array.from(grindInputs).find((g) => !g.disabled);
+      if (firstOk) firstOk.checked = true;
+    }
+    const grind = (new FormData(form).get('grind') as string) || '';
+    priceEls.forEach((el) => (el.hidden = el.dataset.sizePrice !== `${size}|${grind}`));
   };
   form.addEventListener('change', sync);
   sync();

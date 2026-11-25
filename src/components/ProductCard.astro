@@ -1,11 +1,12 @@
 ---
 import Price from './Price.astro';
-import { type Product, lines, prices } from '../data/shop';
+import { type Product, lines, sizes } from '../data/shop';
+import { fromPrice } from '../data/catalog';
 import { type Lang, t as tr, url, asset } from '../i18n/ui';
 interface Props { product: Product; lang: Lang }
 const { product: p, lang } = Astro.props;
 const t = tr(lang);
-const first = prices[p.line][p.sizes[0]]!;
+const first = fromPrice(p);
 ---
 <article class="card">
   <a href={url(lang, 'product', p.slug)} class="img">
@@ -15,7 +16,7 @@ const first = prices[p.line][p.sizes[0]]!;
     <p class="line">{lines[p.line].name}</p>
     <h3><a href={url(lang, 'product', p.slug)}>{p.line === 'silent-sunrise' ? p.roast[lang] : p.name}</a></h3>
     <p class="meta">{p.process[lang]} · {p.roast[lang]}</p>
-    <p class="price-row"><Price nio={first.nio} usd={first.usd} prefix={t('shop.from')} /> <span class="size">/ 340 g</span></p>
+    <p class="price-row"><Price nio={first.nio} usd={first.usd} prefix={t('shop.from')} /> <span class="size">/ {sizes[first.size].label}</span></p>
   </div>
 </article>
 
