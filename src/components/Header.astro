@@ -1,0 +1,174 @@
+---
+import Stamp from './Stamp.astro';
+import { type Lang, t as tr, url, otherLang } from '../i18n/ui';
+import { contact } from '../data/shop';
+interface Props { lang: Lang; there: string }
+const { lang, there } = Astro.props;
+const t = tr(lang);
+const path = Astro.url.pathname.replace(/\/?$/, '/');
+const isShop = path === url(lang, 'shop') || path.startsWith(url(lang, 'product'));
+---
+<header class="site-header">
+  <div class="announce">{t('tagline')}</div>
+  <div class="wrap bar">
+    <a class="brand" href={url(lang, 'shop')} aria-label="RAJUANSE">
+      <Stamp size={44} />
+      <span class="wordmark">RAJUANSE</span>
+    </a>
+    <nav class="nav" aria-label={lang === 'es' ? 'Principal' : 'Main'}>
+      <a href={url(lang, 'shop')} aria-current={isShop ? 'page' : undefined}>{t('nav.shop')}</a>
+      <a href={contact.website}>{t('nav.site')}</a>
+    </nav>
+    <div class="tools">
+      <div class="cur" role="group" aria-label={t('currency')}>
+        <button type="button" data-setcur="nio">C$</button>
+        <button type="button" data-setcur="usd">US$</button>
+      </div>
+      <a class="lang" href={there} data-setlang={otherLang(lang)} hreflang={otherLang(lang)} lang={otherLang(lang)}>
+        <span aria-hidden="true">{lang === 'es' ? 'EN' : 'ES'}</span><span class="sr-only">{t('lang.switch')}</span>
+      </a>
+      <a class="cart-link" href={url(lang, 'cart')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 7Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 9V6a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+        <span class="sr-only">{t('nav.cart')}</span>
+        <span class="cart-count" data-cart-count hidden>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background: var(--cream);
+    border-bottom: 1px solid rgba(74, 89, 53, 0.18);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .announce {
+    background: var(--olive);
+    color: var(--cream);
+    text-align: center;
+    font-family: var(--font-label);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 0.4em 1em;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 72px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+  }
+  .wordmark {
+    font-family: var(--font-display);
+    font-size: 1.55rem;
+    letter-spacing: 0.18em;
+    color: var(--olive-deep);
+  }
+  .nav {
+    display: flex;
+    gap: 1.6rem;
+    margin-left: auto;
+  }
+  .nav a,
+  .lang {
+    font-family: var(--font-label);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  .nav a[aria-current='page'] {
+    box-shadow: inset 0 -2px 0 var(--orange);
+  }
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+  .cur {
+    display: flex;
+    border: 1px solid rgba(74, 89, 53, 0.4);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .cur button {
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    border: 0;
+    background: transparent;
+    color: var(--olive);
+    padding: 0.3em 0.7em;
+    cursor: pointer;
+  }
+  :global(html[data-cur='nio']) .cur [data-setcur='nio'],
+  :global(html[data-cur='usd']) .cur [data-setcur='usd'] {
+    background: var(--olive);
+    color: var(--cream);
+  }
+  .lang {
+    border: 1px solid rgba(74, 89, 53, 0.4);
+    border-radius: 999px;
+    padding: 0.2em 0.7em;
+  }
+  .cart-link {
+    position: relative;
+    display: flex;
+    padding: 0.3rem;
+    color: var(--olive);
+  }
+  .cart-count {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    min-width: 19px;
+    height: 19px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    padding: 0 4px;
+  }
+  .cart-count[hidden] {
+    display: none;
+  }
+  @media (max-width: 760px) {
+    .bar {
+      flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      padding-top: 0.6rem;
+      padding-bottom: 0.6rem;
+    }
+    .wordmark {
+      font-size: 1.2rem;
+      letter-spacing: 0.12em;
+    }
+    .brand :global(svg) {
+      width: 36px;
+      height: 36px;
+    }
+    .tools {
+      margin-left: auto;
+      gap: 0.6rem;
+    }
+    .nav {
+      order: 3;
+      width: 100%;
+      margin: 0;
+      gap: 1.4rem;
+    }
+  }
+</style>

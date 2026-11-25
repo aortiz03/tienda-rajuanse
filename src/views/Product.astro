@@ -1,0 +1,330 @@
+---
+import Base from '../layouts/Base.astro';
+import Price from '../components/Price.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { type Product, lines, prices, sizes, products, pricesIncludeIVA } from '../data/shop';
+import { type Lang, t as tr, url } from '../i18n/ui';
+interface Props { lang: Lang; product: Product }
+const { lang, product: p } = Astro.props;
+const t = tr(lang);
+const es = lang === 'es';
+const line = lines[p.line];
+const title = `${line.name} · ${p.name}`;
+const related = products.filter((x) => x.line === p.line && x.slug !== p.slug).slice(0, 3);
+const tbc = t('tbc');
+const facts: [string, string | null][] = [
+  [t('product.variety'), p.variety],
+  [t('product.process'), p.process[lang]],
+  [t('product.roast'), p.roast[lang]],
+  [t('product.origin'), 'Hacienda Buena Esperanza, Matagalpa, Nicaragua'],
+  [t('product.altitude'), null],
+  [t('product.harvest'), null],
+  [t('product.score'), null],
+  [t('product.lot'), null],
+  [t('product.roastDate'), null],
+];
+---
+<Base lang={lang} title={title} route="product" slug={p.slug} image={p.image} description={p.intro[lang]}>
+  <section class="section top">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="breadcrumb">
+        <a href={url(lang, 'shop')}>{t('nav.shop')}</a> / <span>{line.name}</span>
+      </nav>
+      <div class="layout">
+        <div class="gallery">
+          <div class="main-img">
+            <img src={p.image} alt={title} width="1000" height="1000" />
+          </div>
+        </div>
+
+        <div class="info">
+          <p class="eyebrow">{line.name}</p>
+          <h1>{p.name}</h1>
+          <p class="sub">{p.roast[lang]} · {p.process[lang]}</p>
+          <p>{p.intro[lang]} {line.description[lang]}</p>
+
+          <div class="badges">
+            <span class="badge">{t('badge.ra')}</span>
+            <span class="badge">{t('badge.origin')}</span>
+            <span class="badge">{t('badge.trace')}</span>
+          </div>
+
+          <form class="buy" data-add-to-cart={p.slug}>
+            <fieldset>
+              <legend>{t('product.size')}</legend>
+              <div class="pills">
+                {p.sizes.map((s, i) => (
+                  <label class="pill">
+                    <input type="radio" name="size" value={s} checked={i === 0} />
+                    <span>{sizes[s].label}<small>{sizes[s].imperial}</small></span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>{t('product.grind')}</legend>
+              <div class="pills">
+                <label class="pill"><input type="radio" name="grind" value="whole" checked /><span>{t('product.grind.whole')}</span></label>
+                <label class="pill"><input type="radio" name="grind" value="ground" /><span>{t('product.grind.ground')}</span></label>
+              </div>
+            </fieldset>
+
+            <div class="price-big">
+              {p.sizes.map((s) => {
+                const pr = prices[p.line][s]!;
+                return <span data-size-price={s}><Price nio={pr.nio} usd={pr.usd} /></span>;
+              })}
+              <span class="tbc">{tbc}</span>
+            </div>
+            <p class="small">{pricesIncludeIVA && es ? t('priceNote.iva') + ' ' : ''}{t('priceNote.placeholder')}</p>
+
+            <div class="buy-row">
+              <label class="qty">
+                <span class="sr-only">{t('product.qty')}</span>
+                <input type="number" name="qty" value="1" min="1" max="99" inputmode="numeric" />
+              </label>
+              <button class="btn btn-primary" type="submit">{t('product.add')}</button>
+            </div>
+            <p class="added" data-added hidden role="status">
+              ✓ {t('product.added')} · <a href={url(lang, 'cart')}>{t('nav.cart')} →</a>
+            </p>
+          </form>
+
+          <div class="delivery">
+            <p>{t('product.delivery')} <a href={url(lang, 'shipping')}>{es ? 'Envíos' : 'Shipping'}</a> · <a href={url(lang, 'returns')}>{es ? 'Devoluciones' : 'Returns'}</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="facts">
+        <div>
+          <h2>{t('product.notes')}</h2>
+          {p.tastingNotes[lang] ? <p class="notes">{p.tastingNotes[lang]}</p> : <p class="notes muted">{t('product.notesSoon')} <span class="tbc">{tbc}</span></p>}
+        </div>
+        <div>
+          <h2>{t('product.facts')}</h2>
+          <dl>
+            {facts.map(([k, v]) => (
+              <div><dt>{k}</dt><dd>{v ?? <span class="tbc">{tbc}</span>}</dd></div>
+            ))}
+            <div><dt>{t('product.grind')}</dt><dd>{t('product.grind.whole')} · {t('product.grind.ground')}</dd></div>
+            <div><dt>{t('product.size')}</dt><dd>{p.sizes.map((s) => `${sizes[s].label} (${sizes[s].imperial})`).join(' · ')}</dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section section-tan">
+      <div class="wrap">
+        <h2>{t('product.related')}</h2>
+        <div class="grid">
+          {related.map((r) => <ProductCard product={r} lang={lang} />)}
+        </div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .top {
+    padding-top: 24px;
+  }
+  .crumbs {
+    font-family: var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(24px, 5vw, 64px);
+    align-items: start;
+  }
+  .main-img {
+    background: var(--tan);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .img-note {
+    font-size: 0.8rem;
+    text-align: center;
+    opacity: 0.7;
+    margin: 0.6rem auto 0;
+  }
+  .sub {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--rust);
+  }
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .buy {
+    background: var(--cream-light);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+  }
+  fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0 0 1.1rem;
+  }
+  legend {
+    font-family: var(--font-label);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .pill {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .pill input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+  .pill span {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1.5px solid rgba(74, 89, 53, 0.45);
+    border-radius: var(--radius);
+    padding: 0.45em 1em;
+    min-width: 4.5em;
+    line-height: 1.25;
+  }
+  .pill small {
+    font-size: 0.75rem;
+    opacity: 0.75;
+  }
+  .pill input:checked + span {
+    background: var(--olive);
+    border-color: var(--olive);
+    color: var(--cream);
+  }
+  .pill input:focus-visible + span {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+  }
+  .price-big {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    color: var(--olive-deep);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  [data-size-price][hidden] {
+    display: none;
+  }
+  .small {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .buy-row {
+    display: flex;
+    gap: 0.75rem;
+  }
+  .qty {
+    margin: 0;
+    width: 5rem;
+    flex: none;
+  }
+  .qty input {
+    text-align: center;
+    height: 100%;
+  }
+  .buy-row .btn {
+    flex: 1;
+  }
+  .added {
+    margin: 0.8rem 0 0;
+    font-weight: 500;
+  }
+  .delivery {
+    margin-top: 1.2rem;
+    font-size: 0.95rem;
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: clamp(24px, 5vw, 64px);
+    margin-top: clamp(40px, 6vw, 72px);
+    border-top: 1px solid rgba(74, 89, 53, 0.25);
+    padding-top: 2rem;
+  }
+  .facts h2 {
+    font-size: 1.5rem;
+  }
+  .notes {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+  }
+  .muted {
+    opacity: 0.8;
+  }
+  dl {
+    margin: 0;
+  }
+  dl div {
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(74, 89, 53, 0.18);
+  }
+  dt {
+    font-family: var(--font-label);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.9rem;
+  }
+  dd {
+    margin: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 2rem 1.5rem;
+  }
+  @media (max-width: 760px) {
+    .layout,
+    .facts {
+      grid-template-columns: 1fr;
+    }
+    .main-img {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    dl div {
+      grid-template-columns: 8.5rem 1fr;
+    }
+    .grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem 1rem;
+    }
+  }
+</style>

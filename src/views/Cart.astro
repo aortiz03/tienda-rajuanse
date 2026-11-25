@@ -1,0 +1,243 @@
+---
+import Base from '../layouts/Base.astro';
+import { products, lines, prices, sizes, shippingZones, paymentMethods, contact, pricesIncludeIVA } from '../data/shop';
+import { type Lang, t as tr, url, ui } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = tr(lang);
+const es = lang === 'es';
+
+// Datos que necesita el carrito en el navegador
+const catalog = Object.fromEntries(
+  products.map((p) => [
+    p.slug,
+    {
+      name: `${lines[p.line].name} · ${p.name}`,
+      image: p.image,
+      url: url(lang, 'product', p.slug),
+      prices: prices[p.line],
+    },
+  ]),
+);
+const config = {
+  lang,
+  whatsapp: contact.whatsapp,
+  email: contact.email,
+  sizes,
+  strings: ui[lang],
+};
+---
+<Base lang={lang} title={t('cart.title')} route="cart">
+  <section class="section">
+    <div class="wrap">
+      <h1>{t('cart.title')}</h1>
+
+      <div data-cart-empty hidden class="empty">
+        <p>{t('cart.empty')}</p>
+        <a class="btn btn-primary" href={url(lang, 'shop')}>{t('shop.cta')}</a>
+      </div>
+
+      <div data-cart-full hidden class="layout">
+        <div>
+          <ul class="items" data-cart-items></ul>
+          <div class="totals">
+            <div><span>{t('cart.subtotal')}</span><strong data-subtotal></strong></div>
+            <div><span>{t('cart.shipping')}</span><span>{t('cart.shippingNote')}</span></div>
+            <p class="small">{pricesIncludeIVA && es ? t('priceNote.iva') + ' ' : ''}{t('priceNote.placeholder')}</p>
+          </div>
+          <a class="continue" href={url(lang, 'shop')}>← {t('cart.continue')}</a>
+        </div>
+
+        <form class="checkout" data-checkout novalidate>
+          <h2>{t('checkout.title')}</h2>
+          <p class="small">{t('checkout.lead')}</p>
+          <div class="field"><label for="c-name">{t('checkout.name')} *</label><input id="c-name" name="name" required autocomplete="name" /></div>
+          <div class="two">
+            <div class="field"><label for="c-phone">{t('checkout.phone')} *</label><input id="c-phone" name="phone" type="tel" required autocomplete="tel" /></div>
+            <div class="field"><label for="c-email">{t('checkout.email')}</label><input id="c-email" name="email" type="email" autocomplete="email" /></div>
+          </div>
+          <div class="field">
+            <label for="c-zone">{t('checkout.zone')} *</label>
+            <select id="c-zone" name="zone" required>
+              {shippingZones.map((z) => <option value={z.id}>{z[lang]}</option>)}
+            </select>
+          </div>
+          <div class="field"><label for="c-address">{t('checkout.address')} *</label><textarea id="c-address" name="address" required autocomplete="street-address"></textarea></div>
+          <div class="field">
+            <label for="c-pay">{t('checkout.payment')}</label>
+            <select id="c-pay" name="payment">
+              {paymentMethods.map((m) => <option value={m.id}>{m[lang]}</option>)}
+            </select>
+          </div>
+          <div class="field"><label for="c-notes">{t('checkout.notes')}</label><textarea id="c-notes" name="notes"></textarea></div>
+          <label class="consent"><input type="checkbox" name="consent" required /> <span>{es ? 'Acepto los ' : 'I accept the '}<a href={url(lang, 'terms')}>{es ? 'términos' : 'terms'}</a>{es ? ' y la ' : ' and the '}<a href={url(lang, 'privacy')}>{es ? 'política de privacidad' : 'privacy policy'}</a>. *</span></label>
+          <p class="error" data-error hidden role="alert">{t('checkout.required')}</p>
+          <div class="send">
+            <button class="btn btn-primary" type="submit" data-via="whatsapp">{t('checkout.whatsapp')}</button>
+            <button class="btn btn-outline" type="submit" data-via="email">{t('checkout.email.send')}</button>
+          </div>
+          <p class="small safety">🔒 {t('checkout.safety')}</p>
+        </form>
+      </div>
+    </div>
+  </section>
+  <script type="application/json" id="cart-catalog" set:html={JSON.stringify(catalog)} />
+  <script type="application/json" id="cart-config" set:html={JSON.stringify(config)} />
+  <script>
+    import '../scripts/cart-page.ts';
+  </script>
+</Base>
+
+<style>
+  .empty {
+    padding: 2rem 0;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(24px, 5vw, 64px);
+    align-items: start;
+  }
+  .layout[hidden],
+  .empty[hidden] {
+    display: none;
+  }
+  .items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid rgba(74, 89, 53, 0.25);
+  }
+  .items :global(li) {
+    display: grid;
+    grid-template-columns: 84px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(74, 89, 53, 0.25);
+  }
+  .items :global(img) {
+    border-radius: var(--radius);
+    background: var(--tan);
+  }
+  .items :global(.name) {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    text-decoration: none;
+    color: var(--olive-deep);
+    line-height: 1.25;
+    display: block;
+  }
+  .items :global(.opts) {
+    font-size: 0.9rem;
+    margin: 0.2rem 0 0.4rem;
+  }
+  .items :global(.ctrl) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .items :global(.ctrl button) {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    border: 1px solid rgba(74, 89, 53, 0.45);
+    background: transparent;
+    color: var(--olive);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .items :global(.ctrl .rm) {
+    width: auto;
+    border: 0;
+    text-decoration: underline;
+    font-size: 0.85rem;
+    margin-left: 0.4rem;
+  }
+  .items :global(.line-total) {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .totals {
+    padding: 1rem 0;
+  }
+  .totals div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+  }
+  .totals strong {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 500;
+  }
+  .small {
+    font-size: 0.88rem;
+  }
+  .continue {
+    font-family: var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .checkout {
+    background: var(--cream-light);
+    border-radius: var(--radius);
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+  .checkout h2 {
+    font-size: 1.6rem;
+  }
+  .field {
+    margin-bottom: 1rem;
+  }
+  .two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1rem;
+  }
+  .consent {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.95rem;
+  }
+  .consent input {
+    width: auto;
+    margin-top: 0.3em;
+  }
+  .error {
+    color: var(--rust);
+    font-weight: 500;
+  }
+  .send {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+  .safety {
+    margin-top: 1rem;
+  }
+  @media (max-width: 860px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 480px) {
+    .two {
+      grid-template-columns: 1fr;
+    }
+    .items :global(li) {
+      grid-template-columns: 64px 1fr;
+    }
+    .items :global(.line-total) {
+      grid-column: 2;
+    }
+  }
+</style>

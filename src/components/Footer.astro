@@ -1,0 +1,109 @@
+---
+import Stamp from './Stamp.astro';
+import { contact } from '../data/shop';
+import { type Lang, t as tr, url } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = tr(lang);
+const es = lang === 'es';
+---
+<footer class="site-footer">
+  <div class="wrap grid">
+    <div>
+      <Stamp size={72} />
+      <p class="tag">{t('tagline')}</p>
+      <p class="small">RAJUANSE Estates · Hacienda Buena Esperanza<br />Matagalpa, Nicaragua</p>
+      <span class="badge ra">Rainforest Alliance Certified</span>
+    </div>
+    <div>
+      <h3>{t('footer.policies')}</h3>
+      <ul>
+        <li><a href={url(lang, 'shipping')}>{es ? 'Envíos' : 'Shipping'}</a></li>
+        <li><a href={url(lang, 'returns')}>{es ? 'Devoluciones y reembolsos' : 'Returns and refunds'}</a></li>
+        <li><a href={url(lang, 'payments')}>{es ? 'Pagos' : 'Payments'}</a></li>
+        <li><a href={url(lang, 'privacy')}>{es ? 'Privacidad' : 'Privacy'}</a></li>
+        <li><a href={url(lang, 'terms')}>{es ? 'Términos del servicio' : 'Terms of service'}</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>{t('footer.contact')}</h3>
+      <ul>
+        <li><a href={`https://wa.me/${contact.whatsapp}`} rel="noopener">WhatsApp</a> <span class="tbc">{t('tbc')}</span></li>
+        <li><a href={`mailto:${contact.email}`}>{contact.email}</a> <span class="tbc">{t('tbc')}</span></li>
+        <li><a href={contact.instagram} rel="noopener">Instagram @rajuanse_estates</a></li>
+        <li><a href={contact.facebook} rel="noopener">Facebook</a> · <a href={contact.linkedin} rel="noopener">LinkedIn</a></li>
+        <li><a href={contact.website} rel="noopener">rajuanse.com</a></li>
+      </ul>
+      <p class="small">{es ? 'Lunes a sábado, 9:00 a 18:00 (hora de Nicaragua)' : 'Monday to Saturday, 9:00 to 18:00 (Nicaragua time)'} <span class="tbc">{t('tbc')}</span></p>
+    </div>
+  </div>
+  <div class="wrap legal">
+    <span>© {new Date().getFullYear()} {contact.legalName}</span>
+    <span>{t('footer.legal')}</span>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--olive-deep);
+    color: var(--cream);
+    padding: 56px 0 24px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1.2fr;
+    gap: 2.5rem;
+  }
+  h3 {
+    color: var(--cream);
+    font-size: 1.15rem;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    margin-bottom: 0.5em;
+  }
+  a {
+    color: var(--cream);
+    text-underline-offset: 3px;
+  }
+  .tag {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.2rem;
+    margin-top: 1rem;
+  }
+  .small {
+    font-size: 0.92rem;
+    opacity: 0.9;
+  }
+  .ra {
+    background: transparent;
+    color: var(--cream);
+    border-color: rgba(245, 232, 206, 0.4);
+  }
+  .tbc {
+    color: var(--tan);
+    border-color: var(--tan);
+  }
+  .legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    margin-top: 2.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(245, 232, 206, 0.2);
+    font-size: 0.85rem;
+    opacity: 0.85;
+  }
+  @media (max-width: 760px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+</style>
