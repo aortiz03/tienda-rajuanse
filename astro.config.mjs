@@ -1,8 +1,10 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-// Cambia "site" por el dominio final cuando la tienda esté publicada.
+// SITE_URL y BASE_PATH los define la publicación automática (GitHub Pages).
+// Con un dominio propio (p. ej. tienda.rajuanse.com) BASE_PATH queda vacío.
 export default defineConfig({
-  site: 'https://tienda.rajuanse.com',
+  site: process.env.SITE_URL || 'https://tienda.rajuanse.com',
+  base: process.env.BASE_PATH || '/',
   trailingSlash: 'ignore',
 });
