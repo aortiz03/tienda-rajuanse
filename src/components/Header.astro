@@ -1,23 +1,23 @@
 ---
 import Stamp from './Stamp.astro';
 import { type Lang, t as tr, url, otherLang } from '../i18n/ui';
+import { contact } from '../data/shop';
 interface Props { lang: Lang; there: string }
 const { lang, there } = Astro.props;
 const t = tr(lang);
 const path = Astro.url.pathname.replace(/\/?$/, '/');
-const isShop = path.startsWith(url(lang, 'shop')) || path.startsWith(url(lang, 'product'));
-const isAbout = path.startsWith(url(lang, 'about'));
+const isShop = path === url(lang, 'shop') || path.startsWith(url(lang, 'product'));
 ---
 <header class="site-header">
   <div class="announce">{t('tagline')}</div>
   <div class="wrap bar">
-    <a class="brand" href={url(lang, 'home')} aria-label="RAJUANSE">
+    <a class="brand" href={url(lang, 'shop')} aria-label="RAJUANSE">
       <Stamp size={44} />
       <span class="wordmark">RAJUANSE</span>
     </a>
     <nav class="nav" aria-label={lang === 'es' ? 'Principal' : 'Main'}>
       <a href={url(lang, 'shop')} aria-current={isShop ? 'page' : undefined}>{t('nav.shop')}</a>
-      <a href={url(lang, 'about')} aria-current={isAbout ? 'page' : undefined}>{t('nav.about')}</a>
+      <a href={contact.website}>{t('nav.site')}</a>
     </nav>
     <div class="tools">
       <div class="cur" role="group" aria-label={t('currency')}>

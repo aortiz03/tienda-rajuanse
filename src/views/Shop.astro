@@ -8,11 +8,16 @@ const { lang } = Astro.props;
 const t = tr(lang);
 const groups = (['family-reserve', 'silent-sunrise'] as const).map((id) => ({ id, items: products.filter((p) => p.line === id) }));
 ---
-<Base lang={lang} title={t('shop.title')} route="shop">
+<Base lang={lang} title="" route="shop">
   <section class="section">
     <div class="wrap">
+      <p class="eyebrow">{t('shop.eyebrow')}</p>
       <h1>{t('shop.title')}</h1>
       <p class="lead">{t('shop.lead')}</p>
+      <div class="badges">
+        <span class="badge">{t('badge.ra')}</span>
+        <span class="badge">{t('badge.origin')}</span>
+      </div>
       <p class="note">{pricesIncludeIVA && lang === 'es' ? t('priceNote.iva') + ' ' : ''}{t('priceNote.placeholder')} <span class="tbc">{t('tbc')}</span></p>
       {groups.map(({ id, items }) => (
         <div class="group">
@@ -32,6 +37,12 @@ const groups = (['family-reserve', 'silent-sunrise'] as const).map((id) => ({ id
 <style>
   .lead {
     font-size: 1.15rem;
+  }
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
   .note {
     font-size: 0.92rem;

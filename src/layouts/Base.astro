@@ -23,7 +23,7 @@ const { lang, title, description, route, slug = '', image } = Astro.props;
 const alt = otherLang(lang);
 const here = url(lang, route, slug);
 const there = url(alt, route, slug);
-const fullTitle = title ? `${title} · RAJUANSE` : 'RAJUANSE · Café de Matagalpa, Nicaragua';
+const fullTitle = title ? `${title} · RAJUANSE` : (lang === 'es' ? 'Tienda RAJUANSE · Café de Matagalpa, Nicaragua' : 'RAJUANSE Shop · Coffee from Matagalpa, Nicaragua');
 const desc =
   description ??
   (lang === 'es'

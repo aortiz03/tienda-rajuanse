@@ -5,7 +5,7 @@ Online shop for RAJUANSE Estates: Spanish by default, English for US visitors.
 
 ## Qué hay / What's here
 
-- Inicio, tienda, 8 páginas de producto, carrito y pedido, "Nuestra historia" y 5 políticas (envíos, devoluciones, pagos, privacidad, términos), en español (`/`) e inglés (`/en/`).
+- Sólo la tienda (la página principal y la historia siguen en rajuanse.com): catálogo como portada, 8 páginas de producto, carrito y pedido, y 5 políticas (envíos, devoluciones, pagos, privacidad, términos), en español (`/`) e inglés (`/en/`).
 - Selector ES / EN y C$ / US$. Visitantes con el navegador en inglés de EE. UU. ven la versión en inglés automáticamente; su elección se recuerda.
 - El carrito se guarda en el navegador. El cliente envía el pedido por **WhatsApp** o **correo**; no hay pago con tarjeta todavía.
 - Todo lo que falta confirmar aparece en la página con la etiqueta **POR CONFIRMAR**.
