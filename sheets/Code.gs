@@ -4,7 +4,7 @@
  * Pegar este archivo en la hoja: Extensiones → Apps Script.
  * Instrucciones completas: sheets/README.md
  *
- * Hace tres cosas:
+ * Hace estas cosas:
  *  1. GET  ?action=variants  → la web lee precios y disponibilidad
  *     de la pestaña product_variants cuando se publica.
  *  2. POST {type:"order"}    → cada pedido hecho en la web se añade
@@ -14,6 +14,8 @@
  *  4. Clientes con cuenta (Firebase, por correo o teléfono):
  *     GET ?action=my_orders&id_token=… devuelve sólo los pedidos de
  *     ese cliente; los pedidos con id_token se ligan a su cuenta.
+ *  5. Panel de administración (Admin.gs + Admin.html): abrir la URL
+ *     del script con la cuenta de Google autorizada.
  */
 
 const REPO = 'aortiz03/tienda-rajuanse';
@@ -26,6 +28,8 @@ function doGet(e) {
   const action = e && e.parameter && e.parameter.action;
   if (action === 'variants') return json_({ variants: readVariants_() });
   if (action === 'my_orders') return json_(myOrders_(e.parameter.id_token));
+  // Panel de administración (Admin.gs): sólo para los correos de ADMIN_EMAILS.
+  if (!action && isAdmin_()) return adminPage_();
   return json_({ ok: true, info: 'RAJUANSE sheet API' });
 }
 
@@ -152,7 +156,7 @@ function findOrCreateCustomer_(c, now) {
   return createCustomer_(c, now, null);
 }
 
-function createCustomer_(c, now, user) {
+function createCustomer_(c, now, user, notes) {
   const rows = readTable_('customers');
   let max = 0;
   rows.forEach((r) => {
@@ -170,7 +174,7 @@ function createCustomer_(c, now, user) {
     country: c.country,
     marketing_opt_in: 'no',
     address: c.address,
-    notes: 'Creado desde la web',
+    notes: notes || 'Creado desde la web',
     created_at: now,
     auth_uid: user ? user.uid : '',
     auth_provider: user ? user.provider : '',

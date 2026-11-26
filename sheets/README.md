@@ -55,6 +55,59 @@ their own orders.
    appear in the `orders` tab. Change a price, use **Tienda → Publicar cambios en la
    web**, and check the site after 2 to 3 minutes.
 
+## Admin dashboard (panel de administración)
+
+A private page for running the shop day to day, in Spanish, that works on a phone
+too. It reads and writes this same sheet, so the sheet stays the single source of truth.
+
+- **Resumen:** new orders, orders to pack and ship, sales this month, bags to pack,
+  and low-stock warnings.
+- **Pedidos:** every order with filters and search. Open one to move it to the next
+  status, mark it **Completar (entregado)**, cancel it, record payment, shipping,
+  discount and internal notes, or open the customer's WhatsApp.
+- **Nuevo pedido:** add an order that came in by WhatsApp, email or in person. Pick
+  an existing customer or type a new one (a phone number that already exists reuses
+  that customer). It gets the next `RJ-…` number, like web orders.
+- **Inventario:** roasted coffee in kg, one row per coffee and roast (`SS-MED`,
+  `FR-PCL`, …). Record a new roast (**Entrada**) or a count (**Conteo**). When an order
+  moves to `tostado / empacado` (or later) its coffee is subtracted automatically;
+  moving it back, or cancelling it before it ships, puts it back. A coffee with no
+  count yet is "sin controlar" and is not subtracted. Every change is logged.
+- **Productos y precios:** edit `price_nio`, `price_usd` and `active` for every bag,
+  then **Publicar en la web**.
+
+The dashboard adds two tabs, `inventory` and `inventory_moves`, and a
+`stock_deducted` column at the end of `orders`, by itself the first time it opens.
+
+**Who can open it.** Only the Google accounts listed in the script property
+`ADMIN_EMAILS` (comma-separated). If that property is empty, only the account that
+owns the script can. Anyone else who opens the address just sees the public
+`{"ok":true,...}` reply. No extra cost: it runs on the same Apps Script.
+
+### Setup (about 5 minutes)
+
+1. In Apps Script, click **+ → Script**, name it `Admin`, and paste
+   [`Admin.gs`](Admin.gs). Click **+ → HTML**, name it `Admin`, and paste
+   [`Admin.html`](Admin.html). Paste the new [`Code.gs`](Code.gs) over the old one too. Save.
+2. **Project Settings → Script Properties → Add script property:** `ADMIN_EMAILS` =
+   your Google email (add more separated by commas if someone helps you).
+3. Update the shop's deployment: **Deploy → Manage deployments → edit (pencil) →
+   Version: New version → Deploy** (keeps the same URL).
+4. Make the dashboard's own address: **Deploy → New deployment → Web app**,
+   description "Panel", **Execute as: Me**, **Who has access: Only myself**, **Deploy**.
+   Bookmark that **Web app URL** on your computer and phone. Google asks you to
+   approve the new permissions once.
+5. If you add staff later: put their email in `ADMIN_EMAILS` and change that
+   deployment's access to **Anyone with a Google account** (they still need to sign in
+   with a listed account).
+
+To change the items in an existing order, edit the `order_items` tab directly.
+Adding a brand-new coffee still needs a change to the website code (photos and text).
+
+**Moving to a database later.** The page only talks to the `admin…` functions in
+`Admin.gs` through one function, `api()`, in `Admin.html`. Rewrite those functions
+against the database and point `api()` at it; the page itself stays the same.
+
 ## Good to know
 
 - **Don't rename tabs or column headers.** The script finds columns by their names.
