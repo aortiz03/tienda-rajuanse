@@ -1,0 +1,206 @@
+---
+import Base from '../layouts/Base.astro';
+import { sheetUrl } from '../data/catalog';
+import { type Lang, t as tr, url, ui } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = tr(lang);
+const config = { lang, orderEndpoint: sheetUrl, strings: ui[lang], shopUrl: url(lang, 'shop') };
+---
+<Base lang={lang} title={t('acc.title')} route="account">
+  <section class="section">
+    <div class="wrap narrow">
+      <h1>{t('acc.title')}</h1>
+
+      <p data-state="loading">{t('acc.loading')}</p>
+      <p data-state="unavailable" hidden class="notice">{t('acc.unavailable')}</p>
+
+      <div data-state="signedout" hidden>
+        <p class="lead">{t('acc.lead')}</p>
+        <div class="card">
+          <div class="tabs" role="tablist">
+            <button type="button" role="tab" aria-selected="true" data-tab="email">{t('acc.tab.email')}</button>
+            <button type="button" role="tab" aria-selected="false" data-tab="phone">{t('acc.tab.phone')}</button>
+          </div>
+
+          <form data-panel="email" data-email-form>
+            <label for="a-email" data-email-label>{t('acc.email.label')}</label>
+            <input id="a-email" name="email" type="email" autocomplete="email" required />
+            <button class="btn btn-primary" type="submit" data-email-btn>{t('acc.email.send')}</button>
+          </form>
+
+          <div data-panel="phone" hidden>
+            <form data-phone-form>
+              <label for="a-phone">{t('acc.phone.label')}</label>
+              <input id="a-phone" name="phone" type="tel" autocomplete="tel" placeholder={lang === 'es' ? '+505 8888 8888' : '+1 555 123 4567'} required />
+              <p class="hint">{t('acc.phone.hint')}</p>
+              <button class="btn btn-primary" type="submit" id="phone-send-btn">{t('acc.phone.send')}</button>
+            </form>
+            <form data-code-form hidden>
+              <p class="ok" data-code-sent></p>
+              <label for="a-code">{t('acc.code.label')}</label>
+              <input id="a-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required />
+              <button class="btn btn-primary" type="submit">{t('acc.code.verify')}</button>
+            </form>
+          </div>
+
+          <p class="ok" data-msg hidden role="status"></p>
+          <p class="err" data-err hidden role="alert"></p>
+        </div>
+      </div>
+
+      <div data-state="signedin" hidden>
+        <div class="who">
+          <p>{t('acc.signedAs')} <strong data-who></strong></p>
+          <button class="btn btn-outline" type="button" data-signout>{t('acc.signout')}</button>
+        </div>
+
+        <h2>{t('acc.details')}</h2>
+        <dl class="details" data-details></dl>
+        <p class="hint">{t('acc.details.note')}</p>
+
+        <h2>{t('acc.orders')}</h2>
+        <div data-orders><p>{t('acc.orders.loading')}</p></div>
+        <p><a class="btn btn-primary" href={url(lang, 'shop')}>{t('shop.cta')}</a></p>
+      </div>
+    </div>
+  </section>
+  <script type="application/json" id="account-config" set:html={JSON.stringify(config)} />
+  <script>
+    import '../scripts/account-page.ts';
+  </script>
+</Base>
+
+<style>
+  .narrow {
+    max-width: 720px;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  .card {
+    background: var(--cream-light);
+    border-radius: var(--radius);
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.4rem;
+  }
+  .tabs button {
+    font-family: var(--font-label);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    background: transparent;
+    color: var(--olive);
+    border: 1.5px solid rgba(74, 89, 53, 0.45);
+    border-radius: 999px;
+    padding: 0.4em 1.1em;
+    cursor: pointer;
+  }
+  .tabs button[aria-selected='true'] {
+    background: var(--olive);
+    border-color: var(--olive);
+    color: var(--cream);
+  }
+  form .btn {
+    margin-top: 1rem;
+    width: 100%;
+  }
+  .hint {
+    font-size: 0.88rem;
+    margin: 0.4rem 0 0;
+  }
+  .ok {
+    color: var(--olive-deep);
+    font-weight: 500;
+  }
+  .err {
+    color: var(--rust);
+    font-weight: 500;
+  }
+  .who {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--cream-light);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    margin-bottom: 2rem;
+  }
+  .who p {
+    margin: 0;
+  }
+  h2 {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .details :global(div) {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: 1rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid rgba(74, 89, 53, 0.18);
+  }
+  .details :global(dt) {
+    font-family: var(--font-label);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.88rem;
+  }
+  .details :global(dd) {
+    margin: 0;
+  }
+  [data-orders] :global(article) {
+    background: var(--cream-light);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    margin-bottom: 1rem;
+  }
+  [data-orders] :global(.head) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    align-items: baseline;
+  }
+  [data-orders] :global(.num) {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+  }
+  [data-orders] :global(.status) {
+    font-family: var(--font-label);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.82rem;
+    background: var(--olive);
+    color: var(--cream);
+    border-radius: 999px;
+    padding: 0.15em 0.8em;
+  }
+  [data-orders] :global(.status.cancelado) {
+    background: var(--rust);
+  }
+  [data-orders] :global(ul) {
+    padding-left: 1.1em;
+    margin: 0.6rem 0;
+    font-size: 0.95rem;
+  }
+  [data-orders] :global(.total) {
+    font-weight: 600;
+    margin: 0;
+  }
+  @media (max-width: 480px) {
+    .details :global(div) {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>

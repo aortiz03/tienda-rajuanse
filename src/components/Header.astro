@@ -6,6 +6,7 @@ interface Props { lang: Lang; there: string }
 const { lang, there } = Astro.props;
 const t = tr(lang);
 const path = Astro.url.pathname.replace(/\/?$/, '/');
+const authOn = Boolean(import.meta.env.PUBLIC_FIREBASE_API_KEY && import.meta.env.PUBLIC_FIREBASE_PROJECT_ID);
 const isShop = path === url(lang, 'shop') || path.startsWith(url(lang, 'product'));
 ---
 <header class="site-header">
@@ -27,6 +28,12 @@ const isShop = path === url(lang, 'shop') || path.startsWith(url(lang, 'product'
       <a class="lang" href={there} data-setlang={otherLang(lang)} hreflang={otherLang(lang)} lang={otherLang(lang)}>
         <span aria-hidden="true">{lang === 'es' ? 'EN' : 'ES'}</span><span class="sr-only">{t('lang.switch')}</span>
       </a>
+      {authOn && (
+        <a class="cart-link" href={url(lang, 'account')} title={t('nav.account')}>
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20c1.2-3.6 4-5.3 7.5-5.3s6.3 1.7 7.5 5.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span class="sr-only">{t('nav.account')}</span>
+        </a>
+      )}
       <a class="cart-link" href={url(lang, 'cart')}>
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 7Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 9V6a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
         <span class="sr-only">{t('nav.cart')}</span>

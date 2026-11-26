@@ -23,6 +23,47 @@ const form = document.querySelector<HTMLFormElement>('[data-checkout]')!;
 const errorEl = form.querySelector<HTMLElement>('[data-error]')!;
 const sentEl = form.querySelector<HTMLElement>('[data-sent]')!;
 
+// ---------- Cuenta del cliente (opcional) ----------
+const authOn = Boolean(import.meta.env.PUBLIC_FIREBASE_API_KEY && import.meta.env.PUBLIC_FIREBASE_PROJECT_ID);
+let idToken = '';
+let uid = '';
+const field = (name: string) => form.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`[name=${name}]`)!;
+function fillIfEmpty(name: string, value?: string) {
+  const el = field(name);
+  if (el && value && !el.value) el.value = value;
+}
+if (authOn) {
+  import('./auth').then((auth) =>
+    auth.watchUser(async (user, token) => {
+      idToken = token;
+      uid = user?.uid || '';
+      form.querySelector<HTMLElement>('[data-acct-out]')!.hidden = Boolean(user);
+      form.querySelector<HTMLElement>('[data-acct-in]')!.hidden = !user;
+      if (!user) return;
+      form.querySelector('[data-acct-who]')!.textContent = user.email || user.phoneNumber || '';
+      const { loadProfile, fetchMyOrders } = await import('./profile');
+      const p = loadProfile(user.uid);
+      fillIfEmpty('name', p.name);
+      fillIfEmpty('phone', p.phone || user.phoneNumber || '');
+      fillIfEmpty('email', p.email || user.email || '');
+      fillIfEmpty('address', p.address);
+      if (p.zone) field('zone').value = p.zone;
+      if (cfg.orderEndpoint && (!p.name || !p.address)) {
+        try {
+          const data = await fetchMyOrders(cfg.orderEndpoint, token);
+          const c = data.ok ? data.customer : null;
+          if (c) {
+            fillIfEmpty('name', c.full_name);
+            fillIfEmpty('phone', c.whatsapp_phone);
+            fillIfEmpty('email', c.email);
+            fillIfEmpty('address', c.address);
+          }
+        } catch {}
+      }
+    }),
+  );
+}
+
 const fmt = (n: number) => n.toLocaleString('en-US');
 const money = (m: { nio: number; usd: number }) =>
   `<span data-c="nio">C$ ${fmt(m.nio)}</span><span data-c="usd">US$ ${fmt(m.usd)}</span>`;
@@ -179,6 +220,7 @@ function postToSheet(data: FormData, ref: string, via: 'whatsapp' | 'email') {
     subtotal: totals(items)[cur],
     payment_method: String(data.get('payment') || ''),
     customer_note: String(data.get('notes') || '').trim(),
+    ...(idToken ? { id_token: idToken } : {}),
   };
   try {
     fetch(cfg.orderEndpoint, {
@@ -205,6 +247,17 @@ form.addEventListener('submit', (e) => {
   const via = submitter?.dataset.via === 'email' ? 'email' : 'whatsapp';
   const text = orderText(data, ref);
   postToSheet(data, ref, via);
+  if (uid) {
+    import('./profile').then(({ saveProfile }) =>
+      saveProfile(uid, {
+        name: String(data.get('name') || ''),
+        phone: String(data.get('phone') || ''),
+        email: String(data.get('email') || ''),
+        address: String(data.get('address') || ''),
+        zone: String(data.get('zone') || ''),
+      }),
+    );
+  }
   sentEl.querySelector('[data-ref]')!.textContent = ref;
   sentEl.hidden = false;
   if (via === 'email') {
