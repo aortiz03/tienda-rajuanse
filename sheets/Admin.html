@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <base target="_top" />
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=Playfair+Display:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --olive: #4a5935;
+        --olive-deep: #35432a;
+        --orange: #e38024;
+        --orange-dark: #c86a14;
+        --rust: #ac5623;
+        --cream: #f5e8ce;
+        --cream-light: #fbf5ea;
+        --tan: #e0bda4;
+        --ink: #2f3a22;
+        --line: #e4d6bb;
+        --muted: #6f7563;
+        --red: #a8321e;
+        --green: #3e7a3a;
+        --radius: 8px;
+        --font-display: 'Playfair Display', Georgia, serif;
+        --font-body: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+        --font-label: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--cream-light);
+        color: var(--ink);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.45;
+        font-variant-numeric: tabular-nums;
+      }
+      button, input, select, textarea { font: inherit; color: inherit; }
+      a { color: var(--olive); }
+      h1, h2, h3 { margin: 0; font-weight: 600; }
+      h2 { font-family: var(--font-display); font-size: 1.35rem; color: var(--olive-deep); }
+      h3 { font-size: 1rem; }
+
+      header.top {
+        background: var(--olive-deep);
+        color: var(--cream);
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      header.top .brand { font-family: var(--font-label); letter-spacing: 0.12em; font-size: 1.1rem; }
+      header.top .brand b { color: var(--orange); font-weight: 600; }
+      header.top .who { margin-left: auto; font-size: 0.85rem; opacity: 0.8; }
+      nav.tabs {
+        background: var(--olive);
+        display: flex;
+        overflow-x: auto;
+        padding: 0 8px;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+      }
+      nav.tabs button {
+        background: none;
+        border: 0;
+        color: var(--cream);
+        padding: 11px 12px;
+        font-family: var(--font-label);
+        font-size: 1rem;
+        letter-spacing: 0.04em;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      nav.tabs button[aria-current='page'] { border-bottom-color: var(--orange); color: #fff; }
+      main { max-width: 1100px; margin: 0 auto; padding: 18px 16px 90px; }
+      .view { display: none; }
+      .view.on { display: block; }
+      .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+      .spread { justify-content: space-between; }
+      .muted { color: var(--muted); }
+      .small { font-size: 0.85rem; }
+      .stack > * + * { margin-top: 14px; }
+
+      .btn {
+        border: 1px solid var(--olive);
+        background: #fff;
+        color: var(--olive-deep);
+        border-radius: var(--radius);
+        padding: 8px 14px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      .btn:hover { background: var(--cream); }
+      .btn.primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+      .btn.primary:hover { background: var(--orange-dark); }
+      .btn.dark { background: var(--olive); border-color: var(--olive); color: #fff; }
+      .btn.danger { border-color: var(--red); color: var(--red); }
+      .btn.link { border: 0; background: none; padding: 4px 6px; text-decoration: underline; }
+      .btn:disabled { opacity: 0.5; cursor: default; }
+      .btn.sm { padding: 5px 10px; font-size: 0.9rem; }
+
+      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+      .card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px;
+      }
+      .stat .n { font-size: 1.9rem; font-weight: 600; color: var(--olive-deep); line-height: 1.1; }
+      .stat .l { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-size: 0.85rem; }
+      button.card { text-align: left; cursor: pointer; }
+      button.card:hover { border-color: var(--olive); }
+
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+      td.num, th.num { text-align: right; }
+      .table-wrap { overflow-x: auto; }
+
+      .badge {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: var(--cream);
+        color: var(--olive-deep);
+        white-space: nowrap;
+      }
+      .badge.nuevo { background: #fde2c4; color: #8a4a0c; }
+      .badge.confirmado { background: #e9e3c8; color: #5a5320; }
+      .badge.pagado { background: #d8e6cf; color: #2f5a28; }
+      .badge.empacado { background: #d4e0e8; color: #24465c; }
+      .badge.enviado { background: #dcd5ec; color: #45306e; }
+      .badge.entregado { background: var(--olive); color: #fff; }
+      .badge.cancelado { background: #eee; color: #777; text-decoration: line-through; }
+      .badge.low { background: #f6d4cc; color: var(--red); }
+      .badge.off { background: #eee; color: #666; }
+
+      .orders { display: grid; gap: 8px; }
+      .order {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2px 12px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 10px 12px;
+        cursor: pointer;
+        text-align: left;
+        width: 100%;
+      }
+      .order:hover { border-color: var(--olive); }
+      .order .num { font-weight: 600; }
+      .order .tot { text-align: right; font-weight: 600; }
+      .order .sub { font-size: 0.85rem; color: var(--muted); }
+
+      label.f { display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+      label.f > span { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 0.05em; }
+      input[type='text'], input[type='number'], input[type='date'], input[type='search'], input[type='email'], input[type='tel'], select, textarea {
+        width: 100%;
+        border: 1px solid #cdbf9f;
+        background: #fff;
+        border-radius: 6px;
+        padding: 7px 9px;
+        color: var(--ink);
+        font-size: 15px;
+      }
+      textarea { min-height: 64px; resize: vertical; }
+      input:focus, select:focus, textarea:focus, .btn:focus-visible { outline: 2px solid var(--orange); outline-offset: 1px; }
+      .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+      .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+      fieldset { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px 14px; background: #fff; margin: 0; }
+      legend { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--olive); padding: 0 6px; }
+
+      .filters { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+      .chip {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 999px;
+        padding: 4px 12px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+      .chip[aria-pressed='true'] { background: var(--olive); color: #fff; border-color: var(--olive); }
+
+      /* Detalle de pedido */
+      .drawer-bg { position: fixed; inset: 0; background: rgba(30, 36, 20, 0.45); z-index: 20; display: none; }
+      .drawer-bg.on { display: block; }
+      .drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: min(560px, 100%);
+        background: var(--cream-light);
+        z-index: 21;
+        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform 0.18s ease;
+        box-shadow: -6px 0 24px rgba(0, 0, 0, 0.15);
+      }
+      .drawer.on { transform: none; }
+      .drawer .head { position: sticky; top: 0; background: var(--olive-deep); color: var(--cream); padding: 12px 16px; display: flex; align-items: center; gap: 10px; z-index: 1; }
+      .drawer .head h2 { color: #fff; font-size: 1.15rem; }
+      .drawer .head .x { margin-left: auto; background: none; border: 0; color: #fff; font-size: 1.6rem; cursor: pointer; line-height: 1; }
+      .drawer .body { padding: 16px; }
+      .steps { display: flex; flex-wrap: wrap; gap: 4px; }
+      .steps span { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: #eee; color: #888; }
+      .steps span.done { background: var(--olive); color: #fff; }
+
+      dialog { border: 0; border-radius: 10px; padding: 0; width: min(420px, calc(100% - 32px)); }
+      dialog::backdrop { background: rgba(30, 36, 20, 0.45); }
+      dialog form { padding: 18px; }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        background: var(--ink);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        z-index: 40;
+        display: none;
+        max-width: calc(100% - 32px);
+      }
+      .toast.on { display: block; }
+      .toast.err { background: var(--red); }
+      .savebar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        border-top: 1px solid var(--line);
+        padding: 10px 16px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        align-items: center;
+        z-index: 6;
+        flex-wrap: wrap;
+      }
+      .loading { padding: 40px; text-align: center; color: var(--muted); }
+      .neg { color: var(--red); font-weight: 600; }
+      .item-row { display: grid; grid-template-columns: minmax(0, 1fr) 70px 100px 32px; gap: 8px; align-items: end; }
+      .item-row + .item-row { margin-top: 8px; }
+      .item-row .rm { border: 0; background: none; font-size: 1.3rem; cursor: pointer; color: var(--red); padding-bottom: 6px; }
+      .results { display: grid; gap: 4px; margin-top: 6px; }
+      .results button { text-align: left; background: var(--cream-light); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+      .results button:hover { border-color: var(--olive); }
+      .picked { background: var(--cream); border-radius: 6px; padding: 8px 10px; }
+      .switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+      .dirty td { background: #fff6e8; }
+      @media (max-width: 560px) {
+        .item-row { grid-template-columns: 1fr 64px 86px 28px; }
+        th.hide-sm, td.hide-sm { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand"><b>RAJUANSE</b> · PANEL</div>
+      <button class="btn sm" id="refresh" type="button">Actualizar</button>
+      <div class="who" id="who"></div>
+    </header>
+    <nav class="tabs" id="tabs">
+      <button type="button" data-view="home" aria-current="page">Resumen</button>
+      <button type="button" data-view="orders">Pedidos</button>
+      <button type="button" data-view="new">Nuevo pedido</button>
+      <button type="button" data-view="inventory">Inventario</button>
+      <button type="button" data-view="products">Productos y precios</button>
+    </nav>
+
+    <main>
+      <div class="loading" id="loading">Cargando la hoja…</div>
+      <section class="view" id="v-home"></section>
+      <section class="view" id="v-orders"></section>
+      <section class="view" id="v-new"></section>
+      <section class="view" id="v-inventory"></section>
+      <section class="view" id="v-products"></section>
+    </main>
+
+    <div class="drawer-bg" id="drawer-bg"></div>
+    <aside class="drawer" id="drawer" aria-hidden="true"></aside>
+
+    <dialog id="dlg"><form method="dialog" id="dlg-form"></form></dialog>
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      // ------------------------------------------------------------------
+      // Conexión con el servidor. Hoy: Apps Script (google.script.run).
+      // Con una base de datos más adelante, sólo cambia esta función.
+      // ------------------------------------------------------------------
+      function api(name) {
+        const args = Array.prototype.slice.call(arguments, 1);
+        return new Promise(function (resolve, reject) {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(function (err) {
+              reject(new Error((err && err.message) || String(err)));
+            })
+            [name].apply(null, args);
+        });
+      }
+
+      const L = {
+        status: {
+          nuevo: 'Nuevo',
+          confirmado: 'Confirmado',
+          pagado: 'Pagado',
+          'tostado / empacado': 'Tostado / empacado',
+          enviado: 'Enviado',
+          entregado: 'Entregado',
+          cancelado: 'Cancelado',
+        },
+        channel: { web: 'Web', whatsapp: 'WhatsApp', email: 'Correo', in_person: 'En persona' },
+        pay: { transferencia: 'Transferencia', efectivo: 'Efectivo', compra_click: 'Compra Click', paypal: 'PayPal', otro: 'Otro' },
+        roast: { medio: 'Tueste medio', oscuro: 'Tueste oscuro' },
+        grind: { grano: 'Grano', molido: 'Molido' },
+      };
+      const OPEN = ['nuevo', 'confirmado', 'pagado', 'tostado / empacado', 'enviado'];
+      const UNPACKED = ['nuevo', 'confirmado', 'pagado'];
+
+      let D = null; // datos de adminLoad
+      let view = 'home';
+      let orderFilter = 'open';
+      let orderSearch = '';
+      let openOrder = null;
+      let variantEdits = {};
+      let draft = null;
+
+      const $ = (s, el) => (el || document).querySelector(s);
+      const $$ = (s, el) => Array.prototype.slice.call((el || document).querySelectorAll(s));
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+      }
+      function money(n, cur) {
+        const v = Number(n) || 0;
+        return cur === 'USD'
+          ? 'US$ ' + v.toLocaleString('es-NI', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : 'C$ ' + v.toLocaleString('es-NI', { maximumFractionDigits: 2 });
+      }
+      function kg(n) {
+        return (Number(n) || 0).toLocaleString('es-NI', { maximumFractionDigits: 2 }) + ' kg';
+      }
+      function badge(status) {
+        const cls = status === 'tostado / empacado' ? 'empacado' : status;
+        return '<span class="badge ' + esc(cls) + '">' + esc(L.status[status] || status) + '</span>';
+      }
+      function customer(id) {
+        return D.customers.find((c) => c.customer_id === id) || { customer_id: id, full_name: id || 'Sin cliente' };
+      }
+      function variant(sku) {
+        return D.variants.find((v) => v.sku === sku);
+      }
+      function variantLabel(v, withProduct) {
+        if (!v) return '';
+        const parts = [];
+        if (withProduct) parts.push(v.product);
+        if (v.line === 'silent_sunrise') parts.push(v.roast === 'oscuro' ? 'Oscuro' : 'Medio');
+        parts.push(v.weight_g >= 1000 ? v.weight_g / 1000 + ' kg' : v.weight_g + ' g');
+        parts.push(L.grind[v.grind] || v.grind);
+        return parts.join(' · ');
+      }
+      function invLabel(row) {
+        return row.product + (row.product.indexOf('Silent') === 0 ? ' · ' + (row.roast === 'oscuro' ? 'Oscuro' : 'Medio') : '');
+      }
+      function waLink(phone) {
+        const d = String(phone || '').replace(/\D/g, '');
+        return d.length >= 7 ? 'https://wa.me/' + (d.length === 8 ? '505' + d : d) : '';
+      }
+      function today() {
+        return new Date().toISOString().slice(0, 10);
+      }
+
+      let toastTimer;
+      function toast(msg, isErr) {
+        const t = $('#toast');
+        t.textContent = msg;
+        t.className = 'toast on' + (isErr ? ' err' : '');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => (t.className = 'toast'), isErr ? 6000 : 3000);
+      }
+
+      /** Llama al servidor, muestra errores y vuelve a cargar todo. */
+      async function act(btn, fn, okMsg) {
+        if (btn) btn.disabled = true;
+        try {
+          const out = await fn();
+          await load(true);
+          if (okMsg) toast(typeof okMsg === 'function' ? okMsg(out) : okMsg);
+          return out;
+        } catch (e) {
+          toast(e.message, true);
+          throw e;
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      }
+
+      async function load(quiet) {
+        if (!quiet) $('#loading').style.display = 'block';
+        try {
+          D = await api('adminLoad');
+          $('#who').textContent = D.user;
+          render();
+        } catch (e) {
+          $('#loading').textContent = 'No se pudo cargar: ' + e.message;
+          throw e;
+        }
+        $('#loading').style.display = 'none';
+      }
+
+      function setView(v) {
+        view = v;
+        $$('#tabs button').forEach((b) => b.setAttribute('aria-current', b.dataset.view === v ? 'page' : 'false'));
+        $$('.view').forEach((s) => s.classList.toggle('on', s.id === 'v-' + v));
+        render();
+        window.scrollTo(0, 0);
+      }
+
+      function render() {
+        if (!D) return;
+        if (view === 'home') renderHome();
+        if (view === 'orders') renderOrders();
+        if (view === 'new') renderNew();
+        if (view === 'inventory') renderInventory();
+        if (view === 'products') renderProducts();
+        if (openOrder) renderDrawer();
+      }
+
+      // ---------------- Resumen ----------------
+      function committedKg() {
+        const out = {};
+        D.orders.forEach((o) => {
+          if (UNPACKED.indexOf(o.status) < 0 || o.stock_deducted) return;
+          o.items.forEach((i) => {
+            const v = variant(i.sku);
+            if (!v) return;
+            out[v.inventory_id] = (out[v.inventory_id] || 0) + (i.quantity * v.weight_g) / 1000;
+          });
+        });
+        return out;
+      }
+
+      function renderHome() {
+        const count = (st) => D.orders.filter((o) => st.indexOf(o.status) >= 0).length;
+        const month = today().slice(0, 7);
+        const sales = { NIO: 0, USD: 0 };
+        D.orders.forEach((o) => {
+          if (o.status !== 'cancelado' && o.created_at.slice(0, 7) === month) sales[o.currency] = (sales[o.currency] || 0) + o.total;
+        });
+
+        // Bolsas por empacar (pedidos aún no empacados)
+        const bags = {};
+        D.orders
+          .filter((o) => UNPACKED.indexOf(o.status) >= 0)
+          .forEach((o) => o.items.forEach((i) => (bags[i.sku] = (bags[i.sku] || 0) + i.quantity)));
+        const bagRows = Object.keys(bags)
+          .sort()
+          .map((sku) => '<tr><td>' + esc(variantLabel(variant(sku), true) || sku) + '</td><td class="num"><b>' + bags[sku] + '</b></td></tr>')
+          .join('');
+
+        const com = committedKg();
+        const low = D.inventory.filter((r) => r.tracked && (r.stock_kg - (com[r.inventory_id] || 0) <= (r.low_stock_kg || 0)));
+
+        const recent = D.orders.slice(0, 6);
+        $('#v-home').innerHTML =
+          '<div class="stack">' +
+          '<div class="cards">' +
+          statCard(count(['nuevo']), 'Nuevos', 'nuevo') +
+          statCard(count(['confirmado', 'pagado']), 'Por empacar', 'confirmado') +
+          statCard(count(['tostado / empacado']), 'Por enviar', 'tostado / empacado') +
+          statCard(count(['enviado']), 'En camino', 'enviado') +
+          '<div class="card stat"><div class="n">' +
+          esc(money(sales.NIO, 'NIO')) +
+          '</div><div class="l">Ventas del mes' +
+          (sales.USD ? ' · ' + esc(money(sales.USD, 'USD')) : '') +
+          '</div></div>' +
+          '</div>' +
+          (low.length
+            ? '<div class="card"><h3>Poco inventario</h3><p class="small">' +
+              low.map((r) => esc(invLabel(r)) + ': ' + esc(kg(r.stock_kg - (com[r.inventory_id] || 0))) + ' disponibles').join('<br>') +
+              '</p><button class="btn sm" type="button" data-go="inventory">Ver inventario</button></div>'
+            : '') +
+          '<div class="grid2">' +
+          '<div class="card"><div class="row spread"><h3>Bolsas por empacar</h3><span class="small muted">Nuevos, confirmados y pagados</span></div>' +
+          (bagRows ? '<div class="table-wrap"><table><tbody>' + bagRows + '</tbody></table></div>' : '<p class="muted">Nada pendiente.</p>') +
+          '</div>' +
+          '<div class="card"><div class="row spread"><h3>Últimos pedidos</h3><button class="btn link" type="button" data-go="orders">Ver todos</button></div><div class="orders" style="margin-top:8px">' +
+          (recent.map(orderRow).join('') || '<p class="muted">Todavía no hay pedidos.</p>') +
+          '</div></div>' +
+          '</div>' +
+          '<div class="row"><button class="btn primary" type="button" data-go="new">+ Nuevo pedido</button></div>' +
+          '</div>';
+      }
+      function statCard(n, label, status) {
+        return '<button type="button" class="card stat" data-filter="' + esc(status) + '"><div class="n">' + n + '</div><div class="l">' + esc(label) + '</div></button>';
+      }
+
+      // ---------------- Pedidos ----------------
+      function orderRow(o) {
+        const c = customer(o.customer_id);
+        return (
+          '<button type="button" class="order" data-order="' +
+          esc(o.order_number) +
+          '"><div><span class="num">' +
+          esc(o.order_number) +
+          '</span> ' +
+          badge(o.status) +
+          '</div><div class="tot">' +
+          esc(money(o.total, o.currency)) +
+          '</div><div class="sub">' +
+          esc(c.full_name) +
+          ' · ' +
+          esc(L.channel[o.channel] || o.channel) +
+          '</div><div class="sub" style="text-align:right">' +
+          esc(o.created_at.slice(0, 10)) +
+          '</div></button>'
+        );
+      }
+
+      function renderOrders() {
+        const filters = [['open', 'Abiertos']].concat(D.statuses.map((s) => [s, L.status[s] || s])).concat([['all', 'Todos']]);
+        const q = orderSearch.trim().toLowerCase();
+        const qd = q.replace(/\D/g, '');
+        const list = D.orders.filter((o) => {
+          if (orderFilter === 'open' && OPEN.indexOf(o.status) < 0) return false;
+          if (orderFilter !== 'open' && orderFilter !== 'all' && o.status !== orderFilter) return false;
+          if (!q) return true;
+          const c = customer(o.customer_id);
+          const hay = [o.order_number, c.full_name, c.email, o.internal_note].join(' ').toLowerCase();
+          return hay.indexOf(q) >= 0 || (qd.length >= 4 && String(c.whatsapp_phone).replace(/\D/g, '').indexOf(qd) >= 0);
+        });
+        const prevFocus = document.activeElement && document.activeElement.id === 'osearch';
+        $('#v-orders').innerHTML =
+          '<div class="row spread"><h2>Pedidos</h2><button class="btn primary sm" type="button" data-go="new">+ Nuevo pedido</button></div>' +
+          '<div class="filters">' +
+          filters
+            .map((f) => '<button type="button" class="chip" data-ofilter="' + esc(f[0]) + '" aria-pressed="' + (orderFilter === f[0]) + '">' + esc(f[1]) + '</button>')
+            .join('') +
+          '</div>' +
+          '<input type="search" id="osearch" placeholder="Buscar por número, nombre, teléfono o WEB-…" value="' +
+          esc(orderSearch) +
+          '" />' +
+          '<p class="small muted">' +
+          list.length +
+          ' pedido' +
+          (list.length === 1 ? '' : 's') +
+          '</p><div class="orders">' +
+          (list.map(orderRow).join('') || '<p class="muted">No hay pedidos aquí.</p>') +
+          '</div>';
+        if (prevFocus) {
+          const i = $('#osearch');
+          i.focus();
+          i.setSelectionRange(i.value.length, i.value.length);
+        }
+      }
+
+      function showOrder(num) {
+        openOrder = num;
+        renderDrawer();
+        $('#drawer').classList.add('on');
+        $('#drawer-bg').classList.add('on');
+        $('#drawer').setAttribute('aria-hidden', 'false');
+      }
+      function closeOrder() {
+        openOrder = null;
+        $('#drawer').classList.remove('on');
+        $('#drawer-bg').classList.remove('on');
+        $('#drawer').setAttribute('aria-hidden', 'true');
+      }
+
+      function renderDrawer() {
+        const o = D.orders.find((x) => x.order_number === openOrder);
+        if (!o) return closeOrder();
+        const c = customer(o.customer_id);
+        const flow = D.statuses.filter((s) => s !== 'cancelado');
+        const idx = flow.indexOf(o.status);
+        const next = idx >= 0 && idx < flow.length - 1 ? flow[idx + 1] : null;
+        const wa = waLink(c.whatsapp_phone);
+        const items = o.items
+          .map(
+            (i) =>
+              '<tr><td>' +
+              esc(variantLabel(variant(i.sku), true) || i.product || i.sku) +
+              '<div class="small muted">' +
+              esc(i.sku) +
+              '</div></td><td class="num">' +
+              i.quantity +
+              '</td><td class="num">' +
+              esc(money(i.unit_price, o.currency)) +
+              '</td><td class="num">' +
+              esc(money(i.line_total, o.currency)) +
+              '</td></tr>',
+          )
+          .join('');
+        const opt = (list, labels, val, blank) =>
+          (blank ? '<option value="">—</option>' : '') +
+          list.map((s) => '<option value="' + esc(s) + '"' + (s === val ? ' selected' : '') + '>' + esc(labels[s] || s) + '</option>').join('');
+
+        $('#drawer').innerHTML =
+          '<div class="head"><h2>' +
+          esc(o.order_number) +
+          '</h2>' +
+          badge(o.status) +
+          '<button class="x" type="button" data-close aria-label="Cerrar">×</button></div>' +
+          '<div class="body stack">' +
+          '<div class="steps">' +
+          flow.map((s, i) => '<span class="' + (o.status !== 'cancelado' && i <= idx ? 'done' : '') + '">' + esc(L.status[s]) + '</span>').join('') +
+          '</div>' +
+          '<div class="row">' +
+          (next && o.status !== 'cancelado'
+            ? '<button class="btn primary" type="button" data-setstatus="' + esc(next) + '">Marcar como ' + esc((L.status[next] || next).toLowerCase()) + '</button>'
+            : '') +
+          (o.status !== 'entregado' && o.status !== 'cancelado'
+            ? '<button class="btn dark" type="button" data-setstatus="entregado">Completar (entregado)</button>'
+            : '') +
+          (o.status !== 'cancelado' ? '<button class="btn danger" type="button" data-setstatus="cancelado">Cancelar</button>' : '<button class="btn" type="button" data-setstatus="nuevo">Reabrir</button>') +
+          '</div>' +
+          '<div class="card"><div class="row spread"><h3>' +
+          esc(c.full_name) +
+          '</h3><span class="small muted">' +
+          esc(c.customer_id) +
+          (c.has_account ? ' · con cuenta' : '') +
+          '</span></div><div class="small">' +
+          (c.whatsapp_phone ? esc(c.whatsapp_phone) + (wa ? ' · <a href="' + esc(wa) + '" target="_blank" rel="noopener">Abrir WhatsApp</a>' : '') + '<br>' : '') +
+          (c.email ? '<a href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a><br>' : '') +
+          '<span class="muted">Entregar en:</span> ' +
+          esc(o.ship_to || c.address || '—') +
+          (c.delivery_reference ? '<br><span class="muted">Referencia:</span> ' + esc(c.delivery_reference) : '') +
+          '</div><div class="small muted" style="margin-top:6px">' +
+          esc(L.channel[o.channel] || o.channel) +
+          ' · ' +
+          esc(o.created_at) +
+          '</div></div>' +
+          (o.customer_note ? '<div class="card small"><b>Nota del cliente:</b> ' + esc(o.customer_note) + '</div>' : '') +
+          '<div class="card"><div class="table-wrap"><table><thead><tr><th>Café</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Total</th></tr></thead><tbody>' +
+          (items || '<tr><td colspan="4" class="muted">Sin productos</td></tr>') +
+          '</tbody><tfoot><tr><td colspan="3" class="num muted">Subtotal</td><td class="num">' +
+          esc(money(o.subtotal, o.currency)) +
+          '</td></tr><tr><td colspan="3" class="num muted">Envío</td><td class="num">' +
+          esc(money(o.shipping, o.currency)) +
+          '</td></tr>' +
+          (o.discount ? '<tr><td colspan="3" class="num muted">Descuento</td><td class="num">− ' + esc(money(o.discount, o.currency)) + '</td></tr>' : '') +
+          '<tr><td colspan="3" class="num"><b>Total</b></td><td class="num"><b>' +
+          esc(money(o.total, o.currency)) +
+          '</b></td></tr></tfoot></table></div>' +
+          '<p class="small muted">Para cambiar los cafés de un pedido, edita la pestaña order_items de la hoja.</p></div>' +
+          '<form id="oform" class="stack"><fieldset><legend>Pago y envío</legend><div class="grid2">' +
+          '<label class="f"><span>Estado</span><select name="status">' +
+          opt(D.statuses, L.status, o.status) +
+          '</select></label>' +
+          '<label class="f"><span>Forma de pago</span><select name="payment_method">' +
+          opt(D.payment_methods, L.pay, o.payment_method, true) +
+          '</select></label>' +
+          '<label class="f"><span>Referencia de pago</span><input type="text" name="payment_reference" value="' +
+          esc(o.payment_reference) +
+          '"></label>' +
+          '<label class="f"><span>Pagado el</span><input type="date" name="paid_on" value="' +
+          esc(o.paid_on) +
+          '"></label>' +
+          '<label class="f"><span>Envío (' +
+          (o.currency === 'USD' ? 'US$' : 'C$') +
+          ')</span><input type="number" min="0" step="0.01" name="shipping" value="' +
+          esc(o.shipping) +
+          '"></label>' +
+          '<label class="f"><span>Descuento (' +
+          (o.currency === 'USD' ? 'US$' : 'C$') +
+          ')</span><input type="number" min="0" step="0.01" name="discount" value="' +
+          esc(o.discount) +
+          '"></label>' +
+          '<label class="f"><span>Enviado el</span><input type="date" name="shipped_on" value="' +
+          esc(o.shipped_on) +
+          '"></label>' +
+          '</div><label class="f" style="margin-top:12px"><span>Dirección de entrega</span><input type="text" name="ship_to" value="' +
+          esc(o.ship_to) +
+          '"></label>' +
+          '<label class="f" style="margin-top:12px"><span>Nota interna</span><textarea name="internal_note">' +
+          esc(o.internal_note) +
+          '</textarea></label>' +
+          '<div class="row" style="margin-top:12px"><button class="btn primary" type="submit">Guardar cambios</button>' +
+          (o.stock_deducted ? '<span class="small muted">Café ya descontado del inventario.</span>' : '') +
+          '</div></fieldset></form>' +
+          '</div>';
+      }
+
+      async function setStatus(btn, status) {
+        if (status === 'cancelado' && !(await ask('¿Cancelar el pedido ' + openOrder + '?', 'Sí, cancelar'))) return;
+        await act(btn, () => api('adminUpdateOrder', openOrder, { status: status }), 'Pedido ' + openOrder + ': ' + (L.status[status] || status).toLowerCase());
+      }
+
+      async function saveOrderForm(form) {
+        const o = D.orders.find((x) => x.order_number === openOrder);
+        const fd = new FormData(form);
+        const changes = {};
+        ['status', 'payment_method', 'payment_reference', 'paid_on', 'shipped_on', 'ship_to', 'internal_note'].forEach((k) => {
+          if (String(fd.get(k) || '') !== String(o[k] || '')) changes[k] = String(fd.get(k) || '');
+        });
+        ['shipping', 'discount'].forEach((k) => {
+          if (Number(fd.get(k) || 0) !== Number(o[k] || 0)) changes[k] = Number(fd.get(k) || 0);
+        });
+        if (!Object.keys(changes).length) return toast('No hay cambios.');
+        await act(form.querySelector('[type=submit]'), () => api('adminUpdateOrder', openOrder, changes), 'Guardado');
+      }
+
+      // ---------------- Nuevo pedido ----------------
+      function newDraft() {
+        return {
+          customer_id: '',
+          customer: { full_name: '', whatsapp_phone: '', email: '', address: '' },
+          channel: 'whatsapp',
+          currency: 'NIO',
+          status: 'nuevo',
+          payment_method: '',
+          payment_reference: '',
+          shipping: 0,
+          discount: 0,
+          ship_to: '',
+          customer_note: '',
+          internal_note: '',
+          items: [{ sku: '', quantity: 1, unit_price: '', edited: false }],
+          search: '',
+        };
+      }
+      function listPrice(sku, cur) {
+        const v = variant(sku);
+        if (!v) return '';
+        const p = cur === 'USD' ? v.price_usd : v.price_nio;
+        return p == null ? '' : p;
+      }
+      function skuOptions(sel) {
+        const groups = {};
+        D.variants.forEach((v) => (groups[v.product] = groups[v.product] || []).push(v));
+        return (
+          '<option value="">Elige un café…</option>' +
+          Object.keys(groups)
+            .map(
+              (g) =>
+                '<optgroup label="' +
+                esc(g) +
+                '">' +
+                groups[g]
+                  .map(
+                    (v) =>
+                      '<option value="' +
+                      esc(v.sku) +
+                      '"' +
+                      (v.sku === sel ? ' selected' : '') +
+                      '>' +
+                      esc(variantLabel(v, true)) +
+                      (v.active === 'no' ? ' (oculto en la web)' : '') +
+                      '</option>',
+                  )
+                  .join('') +
+                '</optgroup>',
+            )
+            .join('')
+        );
+      }
+      function draftTotals() {
+        const sub = draft.items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0);
+        return { sub: sub, total: sub + (Number(draft.shipping) || 0) - (Number(draft.discount) || 0) };
+      }
+
+      function renderNew() {
+        if (!draft) draft = newDraft();
+        const cur = draft.currency;
+        const picked = draft.customer_id ? customer(draft.customer_id) : null;
+        const opt = (list, labels, val, blank) =>
+          (blank ? '<option value="">—</option>' : '') +
+          list.map((s) => '<option value="' + esc(s) + '"' + (s === val ? ' selected' : '') + '>' + esc(labels[s] || s) + '</option>').join('');
+        const t = draftTotals();
+        $('#v-new').innerHTML =
+          '<form id="nform" class="stack" autocomplete="off">' +
+          '<h2>Nuevo pedido</h2><p class="small muted">Para pedidos que llegan por WhatsApp, correo o en persona. Se guarda en la hoja con el siguiente número RJ-….</p>' +
+          '<fieldset><legend>Cliente</legend>' +
+          (picked
+            ? '<div class="picked row spread"><div><b>' +
+              esc(picked.full_name) +
+              '</b> <span class="small muted">' +
+              esc(picked.customer_id) +
+              '</span><div class="small">' +
+              esc([picked.whatsapp_phone, picked.email].filter(Boolean).join(' · ')) +
+              '</div></div><button class="btn sm" type="button" data-unpick>Cambiar</button></div>'
+            : '<input type="search" id="csearch" placeholder="Buscar cliente por nombre o teléfono" value="' +
+              esc(draft.search) +
+              '"><div class="results" id="cresults"></div>' +
+              '<p class="small muted" style="margin:10px 0 6px">O escribe un cliente nuevo (si el teléfono ya existe, se usa ese cliente):</p>' +
+              '<div class="grid2">' +
+              '<label class="f"><span>Nombre *</span><input type="text" data-c="full_name" value="' +
+              esc(draft.customer.full_name) +
+              '"></label>' +
+              '<label class="f"><span>WhatsApp / teléfono</span><input type="tel" data-c="whatsapp_phone" value="' +
+              esc(draft.customer.whatsapp_phone) +
+              '" placeholder="+505 …"></label>' +
+              '<label class="f"><span>Correo</span><input type="email" data-c="email" value="' +
+              esc(draft.customer.email) +
+              '"></label>' +
+              '<label class="f"><span>Dirección</span><input type="text" data-c="address" value="' +
+              esc(draft.customer.address) +
+              '"></label>' +
+              '</div>') +
+          '</fieldset>' +
+          '<fieldset><legend>Cafés</legend>' +
+          draft.items
+            .map(
+              (i, n) =>
+                '<div class="item-row" data-i="' +
+                n +
+                '"><label class="f"><span>Café</span><select data-it="sku">' +
+                skuOptions(i.sku) +
+                '</select></label><label class="f"><span>Cant.</span><input type="number" min="1" step="1" data-it="quantity" value="' +
+                esc(i.quantity) +
+                '"></label><label class="f"><span>Precio ' +
+                (cur === 'USD' ? 'US$' : 'C$') +
+                '</span><input type="number" min="0" step="0.01" data-it="unit_price" value="' +
+                esc(i.unit_price) +
+                '" placeholder="' +
+                (i.sku && listPrice(i.sku, cur) === '' ? 'sin precio' : '') +
+                '"></label><button type="button" class="rm" data-rm="' +
+                n +
+                '" aria-label="Quitar">×</button></div>',
+            )
+            .join('') +
+          '<div class="row" style="margin-top:10px"><button class="btn sm" type="button" data-additem>+ Agregar café</button></div>' +
+          '</fieldset>' +
+          '<fieldset><legend>Pedido</legend><div class="grid3">' +
+          '<label class="f"><span>Llegó por</span><select data-d="channel">' +
+          opt(D.channels, L.channel, draft.channel) +
+          '</select></label>' +
+          '<label class="f"><span>Moneda</span><select data-d="currency"><option value="NIO"' +
+          (cur === 'NIO' ? ' selected' : '') +
+          '>Córdobas (C$)</option><option value="USD"' +
+          (cur === 'USD' ? ' selected' : '') +
+          '>Dólares (US$)</option></select></label>' +
+          '<label class="f"><span>Estado</span><select data-d="status">' +
+          opt(D.statuses, L.status, draft.status) +
+          '</select></label>' +
+          '<label class="f"><span>Forma de pago</span><select data-d="payment_method">' +
+          opt(D.payment_methods, L.pay, draft.payment_method, true) +
+          '</select></label>' +
+          '<label class="f"><span>Referencia de pago</span><input type="text" data-d="payment_reference" value="' +
+          esc(draft.payment_reference) +
+          '"></label>' +
+          '<label class="f"><span>Envío</span><input type="number" min="0" step="0.01" data-d="shipping" value="' +
+          esc(draft.shipping) +
+          '"></label>' +
+          '<label class="f"><span>Descuento</span><input type="number" min="0" step="0.01" data-d="discount" value="' +
+          esc(draft.discount) +
+          '"></label>' +
+          '</div>' +
+          '<label class="f" style="margin-top:12px"><span>Entregar en (si es distinta a la del cliente)</span><input type="text" data-d="ship_to" value="' +
+          esc(draft.ship_to) +
+          '"></label>' +
+          '<div class="grid2" style="margin-top:12px"><label class="f"><span>Nota del cliente</span><textarea data-d="customer_note">' +
+          esc(draft.customer_note) +
+          '</textarea></label><label class="f"><span>Nota interna</span><textarea data-d="internal_note">' +
+          esc(draft.internal_note) +
+          '</textarea></label></div>' +
+          '</fieldset>' +
+          '<div class="card row spread"><div id="ntotal"><span class="muted">Subtotal</span> ' +
+          esc(money(t.sub, cur)) +
+          ' · <b>Total ' +
+          esc(money(t.total, cur)) +
+          '</b></div><div class="row"><button class="btn" type="button" data-resetdraft>Borrar</button><button class="btn primary" type="submit">Guardar pedido</button></div></div>' +
+          '</form>';
+        renderCustomerResults();
+      }
+
+      function renderCustomerResults() {
+        const box = $('#cresults');
+        if (!box) return;
+        const q = draft.search.trim().toLowerCase();
+        const qd = q.replace(/\D/g, '');
+        if (q.length < 2) return (box.innerHTML = '');
+        const hits = D.customers
+          .filter(
+            (c) =>
+              (c.full_name + ' ' + c.email + ' ' + c.customer_id).toLowerCase().indexOf(q) >= 0 ||
+              (qd.length >= 3 && String(c.whatsapp_phone).replace(/\D/g, '').indexOf(qd) >= 0),
+          )
+          .slice(0, 6);
+        box.innerHTML =
+          hits
+            .map(
+              (c) =>
+                '<button type="button" data-pick="' +
+                esc(c.customer_id) +
+                '"><b>' +
+                esc(c.full_name) +
+                '</b> <span class="small muted">' +
+                esc([c.whatsapp_phone, c.email, c.customer_id].filter(Boolean).join(' · ')) +
+                '</span></button>',
+            )
+            .join('') || '<span class="small muted">Ningún cliente coincide.</span>';
+      }
+
+      function updateDraftTotal() {
+        const t = draftTotals();
+        const el = $('#ntotal');
+        if (el)
+          el.innerHTML = '<span class="muted">Subtotal</span> ' + esc(money(t.sub, draft.currency)) + ' · <b>Total ' + esc(money(t.total, draft.currency)) + '</b>';
+      }
+
+      async function submitDraft(form) {
+        const items = draft.items.filter((i) => i.sku);
+        const missing = items.find((i) => String(i.unit_price) === '');
+        if (missing) return toast('Falta el precio de ' + variantLabel(variant(missing.sku), true), true);
+        const payload = {
+          customer_id: draft.customer_id,
+          customer: draft.customer,
+          channel: draft.channel,
+          currency: draft.currency,
+          status: draft.status,
+          payment_method: draft.payment_method,
+          payment_reference: draft.payment_reference,
+          shipping: Number(draft.shipping) || 0,
+          discount: Number(draft.discount) || 0,
+          ship_to: draft.ship_to,
+          customer_note: draft.customer_note,
+          internal_note: draft.internal_note,
+          items: items.map((i) => ({ sku: i.sku, quantity: Number(i.quantity), unit_price: Number(i.unit_price) })),
+        };
+        const out = await act(form.querySelector('[type=submit]'), () => api('adminCreateOrder', payload), (r) => 'Pedido ' + r.order_number + ' guardado');
+        draft = null;
+        setView('orders');
+        showOrder(out.order_number);
+      }
+
+      // ---------------- Inventario ----------------
+      function renderInventory() {
+        const com = committedKg();
+        const rows = D.inventory
+          .map((r) => {
+            const c = com[r.inventory_id] || 0;
+            const avail = r.stock_kg - c;
+            const low = r.tracked && avail <= (r.low_stock_kg || 0);
+            return (
+              '<tr><td><b>' +
+              esc(invLabel(r)) +
+              '</b>' +
+              (low ? ' <span class="badge low">Bajo</span>' : '') +
+              '<div class="small muted">' +
+              esc(r.inventory_id) +
+              (r.updated_at ? ' · ' + esc(r.updated_at) : '') +
+              '</div></td><td class="num">' +
+              (r.tracked ? '<span class="' + (r.stock_kg < 0 ? 'neg' : '') + '">' + esc(kg(r.stock_kg)) + '</span>' : '<span class="muted">Sin controlar</span>') +
+              '</td><td class="num hide-sm">' +
+              esc(kg(c)) +
+              '</td><td class="num">' +
+              (r.tracked ? '<b class="' + (avail < 0 ? 'neg' : '') + '">' + esc(kg(avail)) + '</b>' : '—') +
+              '</td><td class="num hide-sm"><button class="btn link" type="button" data-low="' +
+              esc(r.inventory_id) +
+              '">' +
+              (r.low_stock_kg == null ? 'Definir' : esc(kg(r.low_stock_kg))) +
+              '</button></td><td class="num"><div class="row" style="justify-content:flex-end;gap:6px"><button class="btn sm" type="button" data-stock-add="' +
+              esc(r.inventory_id) +
+              '">Entrada</button><button class="btn sm" type="button" data-stock-set="' +
+              esc(r.inventory_id) +
+              '">Conteo</button></div></td></tr>'
+            );
+          })
+          .join('');
+        const name = {};
+        D.inventory.forEach((r) => (name[r.inventory_id] = invLabel(r)));
+        const moves = D.moves
+          .slice(0, 40)
+          .map(
+            (m) =>
+              '<tr><td class="small">' +
+              esc(m.created_at) +
+              '</td><td>' +
+              esc(name[m.inventory_id] || m.inventory_id) +
+              '</td><td class="num ' +
+              (m.change_kg < 0 ? 'neg' : '') +
+              '">' +
+              (m.change_kg > 0 ? '+' : '') +
+              esc(kg(m.change_kg)) +
+              '</td><td class="num hide-sm">' +
+              esc(kg(m.stock_after_kg)) +
+              '</td><td class="small">' +
+              esc(m.reason) +
+              (m.order_number ? ' · <button class="btn link" type="button" data-order="' + esc(m.order_number) + '">' + esc(m.order_number) + '</button>' : '') +
+              '</td></tr>',
+          )
+          .join('');
+        $('#v-inventory').innerHTML =
+          '<div class="stack"><h2>Inventario de café tostado</h2>' +
+          '<p class="small muted">Un renglón por café y tueste, en kilos (las bolsas se empacan al recibir el pedido). ' +
+          'Cuando un pedido pasa a <b>Tostado / empacado</b>, su café se descuenta solo; si vuelve atrás o se cancela antes de enviarse, se devuelve. ' +
+          '<b>Comprometido</b> es lo que piden los pedidos que aún no se empacan. Un café “sin controlar” no se descuenta hasta que hagas su primer conteo.</p>' +
+          '<div class="card table-wrap"><table><thead><tr><th>Café</th><th class="num">En bodega</th><th class="num hide-sm">Comprometido</th><th class="num">Disponible</th><th class="num hide-sm">Aviso si baja de</th><th></th></tr></thead><tbody>' +
+          rows +
+          '</tbody></table></div>' +
+          '<div class="card"><h3>Movimientos recientes</h3>' +
+          (moves
+            ? '<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Café</th><th class="num">Cambio</th><th class="num hide-sm">Queda</th><th>Motivo</th></tr></thead><tbody>' + moves + '</tbody></table></div>'
+            : '<p class="muted">Todavía no hay movimientos.</p>') +
+          '</div></div>';
+      }
+
+      async function stockDialog(btn, id, mode) {
+        const r = D.inventory.find((x) => x.inventory_id === id);
+        const res = await formDialog(
+          (mode === 'set' ? 'Conteo: ' : 'Entrada: ') + invLabel(r),
+          (mode === 'set'
+            ? '<p class="small muted">Escribe cuántos kilos hay hoy. Ahora: ' + esc(r.tracked ? kg(r.stock_kg) : 'sin controlar') + '.</p>'
+            : '<p class="small muted">Kilos que entran (por ejemplo, un tueste nuevo). Usa un número negativo para sacar café (muestras, merma).</p>') +
+            '<label class="f"><span>Kilos</span><input type="number" step="0.01" name="kg" required autofocus></label>' +
+            '<label class="f" style="margin-top:10px"><span>Motivo</span><input type="text" name="reason" placeholder="' +
+            (mode === 'set' ? 'conteo' : 'tueste del …') +
+            '"></label>',
+          'Guardar',
+        );
+        if (!res) return;
+        await act(btn, () => api('adminAdjustStock', id, mode, res.kg, res.reason), 'Inventario actualizado');
+      }
+
+      async function lowDialog(btn, id) {
+        const r = D.inventory.find((x) => x.inventory_id === id);
+        const res = await formDialog(
+          'Aviso de poco inventario',
+          '<p class="small muted">' +
+            esc(invLabel(r)) +
+            ': avisar en el resumen cuando lo disponible baje de estos kilos. Déjalo vacío para no avisar.</p><label class="f"><span>Kilos</span><input type="number" min="0" step="0.1" name="kg" value="' +
+            esc(r.low_stock_kg == null ? '' : r.low_stock_kg) +
+            '"></label>',
+          'Guardar',
+        );
+        if (!res) return;
+        await act(btn, () => api('adminSetLowStock', id, res.kg), 'Guardado');
+      }
+
+      // ---------------- Productos y precios ----------------
+      function renderProducts() {
+        const groups = {};
+        D.variants.forEach((v) => (groups[v.product] = groups[v.product] || []).push(v));
+        const n = Object.keys(variantEdits).length;
+        $('#v-products').innerHTML =
+          '<div class="stack"><h2>Productos y precios</h2>' +
+          '<p class="small muted">Precios y disponibilidad de cada bolsa (pestaña product_variants). Un precio vacío usa el precio de referencia de la web. ' +
+          'Desmarca “En la web” para ocultar ese tamaño o molienda. Los cambios llegan a la web cuando pulsas <b>Publicar en la web</b> (o solos cada día a las 6:00). ' +
+          'Para agregar un café nuevo o cambiar fotos y textos hace falta un cambio en el código de la tienda.</p>' +
+          Object.keys(groups)
+            .map(
+              (g) =>
+                '<div class="card"><h3>' +
+                esc(g) +
+                '</h3><div class="table-wrap"><table><thead><tr><th>Bolsa</th><th class="num">C$</th><th class="num">US$</th><th>En la web</th></tr></thead><tbody>' +
+                groups[g]
+                  .map((v) => {
+                    const e = variantEdits[v.sku] || {};
+                    const val = (k) => (e[k] !== undefined ? e[k] : v[k] == null ? '' : v[k]);
+                    return (
+                      '<tr class="' +
+                      (variantEdits[v.sku] ? 'dirty' : '') +
+                      '" data-sku="' +
+                      esc(v.sku) +
+                      '"><td>' +
+                      esc(variantLabel(v, false)) +
+                      '<div class="small muted">' +
+                      esc(v.sku) +
+                      '</div></td><td class="num"><input type="number" min="0" step="1" style="max-width:110px" data-v="price_nio" value="' +
+                      esc(val('price_nio')) +
+                      '"></td><td class="num"><input type="number" min="0" step="0.01" style="max-width:100px" data-v="price_usd" value="' +
+                      esc(val('price_usd')) +
+                      '"></td><td><label class="switch"><input type="checkbox" data-v="active"' +
+                      (val('active') !== 'no' ? ' checked' : '') +
+                      '> ' +
+                      (val('active') !== 'no' ? 'Sí' : '<span class="badge off">Oculto</span>') +
+                      '</label></td></tr>'
+                    );
+                  })
+                  .join('') +
+                '</tbody></table></div></div>',
+            )
+            .join('') +
+          '</div>' +
+          '<div class="savebar"><span class="small muted">' +
+          (n ? n + ' cambio' + (n === 1 ? '' : 's') + ' sin guardar' : 'Sin cambios pendientes') +
+          '</span><button class="btn" type="button" data-vdiscard' +
+          (n ? '' : ' disabled') +
+          '>Descartar</button><button class="btn primary" type="button" data-vsave' +
+          (n ? '' : ' disabled') +
+          '>Guardar en la hoja</button><button class="btn dark" type="button" data-publish' +
+          (D.can_publish ? '' : ' disabled title="Falta GITHUB_TOKEN en el script"') +
+          '>Publicar en la web</button></div>';
+      }
+
+      function editVariant(input) {
+        const sku = input.closest('tr').dataset.sku;
+        const v = variant(sku);
+        const k = input.dataset.v;
+        const value = k === 'active' ? (input.checked ? 'yes' : 'no') : input.value;
+        const orig = k === 'active' ? v.active : v[k] == null ? '' : String(v[k]);
+        const e = variantEdits[sku] || {};
+        if (String(value) === String(orig)) delete e[k];
+        else e[k] = value;
+        if (Object.keys(e).length) variantEdits[sku] = e;
+        else delete variantEdits[sku];
+        if (k === 'active') renderProducts();
+        else {
+          input.closest('tr').classList.toggle('dirty', !!variantEdits[sku]);
+          const n = Object.keys(variantEdits).length;
+          $('.savebar .small').textContent = n ? n + ' cambio' + (n === 1 ? '' : 's') + ' sin guardar' : 'Sin cambios pendientes';
+          $('[data-vsave]').disabled = !n;
+          $('[data-vdiscard]').disabled = !n;
+        }
+      }
+
+      async function saveVariants(btn) {
+        const rows = Object.keys(variantEdits).map((sku) => Object.assign({ sku: sku }, variantEdits[sku]));
+        await act(btn, () => api('adminSaveVariants', rows), 'Precios guardados en la hoja. Pulsa “Publicar en la web” para que se vean.');
+        variantEdits = {};
+        renderProducts();
+      }
+
+      async function publish(btn) {
+        if (Object.keys(variantEdits).length) return toast('Primero guarda o descarta los cambios.', true);
+        if (!(await ask('¿Publicar la web con los precios de la hoja? Tarda 2 a 3 minutos.', 'Publicar'))) return;
+        btn.disabled = true;
+        try {
+          await api('adminPublishSite');
+          toast('Listo. La web se actualiza en 2 a 3 minutos.');
+        } catch (e) {
+          toast(e.message, true);
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      // ---------------- Diálogos ----------------
+      function formDialog(title, html, okLabel) {
+        const dlg = $('#dlg');
+        const form = $('#dlg-form');
+        form.innerHTML =
+          '<h3 style="margin-bottom:10px">' +
+          esc(title) +
+          '</h3>' +
+          html +
+          '<div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn" value="cancel" formnovalidate>Cancelar</button><button class="btn primary" value="ok">' +
+          esc(okLabel) +
+          '</button></div>';
+        return new Promise((resolve) => {
+          dlg.onclose = () => {
+            if (dlg.returnValue !== 'ok') return resolve(null);
+            const out = {};
+            new FormData(form).forEach((v, k) => (out[k] = v));
+            resolve(out);
+          };
+          dlg.returnValue = '';
+          dlg.showModal();
+        });
+      }
+      function ask(msg, okLabel) {
+        return formDialog(msg, '', okLabel).then((r) => !!r);
+      }
+
+      // ---------------- Eventos ----------------
+      document.addEventListener('click', (ev) => {
+        const t = ev.target.closest('button, [data-close]');
+        if (!t) {
+          if (ev.target.id === 'drawer-bg') closeOrder();
+          return;
+        }
+        const d = t.dataset;
+        if (d.view) return setView(d.view);
+        if (d.go) return setView(d.go);
+        if (d.filter) {
+          orderFilter = d.filter;
+          return setView('orders');
+        }
+        if (d.ofilter) {
+          orderFilter = d.ofilter;
+          return renderOrders();
+        }
+        if (d.order) return showOrder(d.order);
+        if (t.hasAttribute('data-close')) return closeOrder();
+        if (d.setstatus) return setStatus(t, d.setstatus).catch(() => {});
+        if (d.stockAdd) return stockDialog(t, d.stockAdd, 'add').catch(() => {});
+        if (d.stockSet) return stockDialog(t, d.stockSet, 'set').catch(() => {});
+        if (d.low) return lowDialog(t, d.low).catch(() => {});
+        if (d.vsave !== undefined) return saveVariants(t).catch(() => {});
+        if (d.vdiscard !== undefined) {
+          variantEdits = {};
+          return renderProducts();
+        }
+        if (d.publish !== undefined) return publish(t);
+        if (d.pick) {
+          draft.customer_id = d.pick;
+          return renderNew();
+        }
+        if (d.unpick !== undefined) {
+          draft.customer_id = '';
+          return renderNew();
+        }
+        if (d.additem !== undefined) {
+          draft.items.push({ sku: '', quantity: 1, unit_price: '', edited: false });
+          return renderNew();
+        }
+        if (d.rm) {
+          draft.items.splice(Number(d.rm), 1);
+          if (!draft.items.length) draft.items.push({ sku: '', quantity: 1, unit_price: '', edited: false });
+          return renderNew();
+        }
+        if (d.resetdraft !== undefined) {
+          draft = newDraft();
+          return renderNew();
+        }
+        if (t.id === 'refresh') return load(true).then(() => toast('Actualizado'));
+      });
+
+      document.addEventListener('input', (ev) => {
+        const t = ev.target;
+        if (t.id === 'osearch') {
+          orderSearch = t.value;
+          return renderOrders();
+        }
+        if (t.id === 'csearch') {
+          draft.search = t.value;
+          return renderCustomerResults();
+        }
+        if (t.dataset.c) draft.customer[t.dataset.c] = t.value;
+        if (t.dataset.d && t.tagName !== 'SELECT') {
+          draft[t.dataset.d] = t.value;
+          updateDraftTotal();
+        }
+        if (t.dataset.it && t.tagName !== 'SELECT') {
+          const it = draft.items[Number(t.closest('.item-row').dataset.i)];
+          it[t.dataset.it] = t.value;
+          if (t.dataset.it === 'unit_price') it.edited = true;
+          updateDraftTotal();
+        }
+        if (t.dataset.v && t.type !== 'checkbox') editVariant(t);
+      });
+
+      document.addEventListener('change', (ev) => {
+        const t = ev.target;
+        if (t.dataset.v && t.type === 'checkbox') return editVariant(t);
+        if (t.dataset.it === 'sku') {
+          const it = draft.items[Number(t.closest('.item-row').dataset.i)];
+          it.sku = t.value;
+          it.unit_price = listPrice(it.sku, draft.currency);
+          it.edited = false;
+          return renderNew();
+        }
+        if (t.dataset.d && t.tagName === 'SELECT') {
+          draft[t.dataset.d] = t.value;
+          if (t.dataset.d === 'currency')
+            draft.items.forEach((i) => {
+              if (i.sku && !i.edited) i.unit_price = listPrice(i.sku, draft.currency);
+            });
+          return renderNew();
+        }
+      });
+
+      document.addEventListener('submit', (ev) => {
+        if (ev.target.id === 'oform') {
+          ev.preventDefault();
+          saveOrderForm(ev.target).catch(() => {});
+        }
+        if (ev.target.id === 'nform') {
+          ev.preventDefault();
+          submitDraft(ev.target).catch(() => {});
+        }
+      });
+
+      document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape' && openOrder && !$('#dlg').open) closeOrder();
+      });
+
+      load().then(() => setView('home'));
+    </script>
+  </body>
+</html>

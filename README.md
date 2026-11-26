@@ -17,6 +17,10 @@ Online shop for RAJUANSE Estates: Spanish by default, English for US visitors.
 - **Configuración:** en GitHub, *Settings → Secrets and variables → Actions → Variables*, crea `SHEET_API_URL` con la URL del Apps Script (termina en `/exec`). Sin esa variable el sitio funciona igual, con los precios de `shop.ts` y sin enviar copia a la hoja.
 - **Actualizar el sitio:** se reconstruye solo cada día a las 6:00 (hora de Nicaragua), con el botón de la hoja (evento `sheet-updated`) o desde *Actions → Publicar en GitHub Pages → Run workflow*. Si la hoja no responde, la publicación se detiene y queda en línea la versión anterior.
 
+## Panel de administración
+
+Página privada (sólo tu cuenta de Google) para ver y mover pedidos, marcarlos como entregados, agregar pedidos de WhatsApp o en persona, llevar el inventario de café tostado y cambiar precios y disponibilidad. Usa la misma hoja de Google. Instalación: `sheets/README.md` → *Admin dashboard*.
+
 ## Cuentas de clientes (opcional)
 
 Los clientes pueden entrar con un enlace por correo (gratis) o un código por SMS (se paga por mensaje). Comprar sin cuenta sigue funcionando.
