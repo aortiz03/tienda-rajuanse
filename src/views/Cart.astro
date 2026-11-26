@@ -53,6 +53,8 @@ const config = {
         <form class="checkout" data-checkout novalidate>
           <h2>{t('checkout.title')}</h2>
           <p class="small">{t('checkout.lead')}</p>
+          <p class="acct" data-acct-out hidden><a href={url(lang, 'account')}>{t('acc.checkout.signin')} →</a></p>
+          <p class="acct in" data-acct-in hidden>✓ {t('acc.checkout.signedIn')}: <strong data-acct-who></strong></p>
           <div class="field"><label for="c-name">{t('checkout.name')} *</label><input id="c-name" name="name" required autocomplete="name" /></div>
           <div class="two">
             <div class="field"><label for="c-phone">{t('checkout.phone')} *</label><input id="c-phone" name="phone" type="tel" required autocomplete="tel" /></div>
@@ -191,6 +193,18 @@ const config = {
   }
   .checkout h2 {
     font-size: 1.6rem;
+  }
+  .acct {
+    font-size: 0.95rem;
+    margin-bottom: 1.2rem;
+  }
+  .acct[hidden] {
+    display: none;
+  }
+  .acct.in {
+    background: var(--cream);
+    padding: 0.5em 0.8em;
+    border-radius: var(--radius);
   }
   .field {
     margin-bottom: 1rem;

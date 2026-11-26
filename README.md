@@ -17,7 +17,20 @@ Online shop for RAJUANSE Estates: Spanish by default, English for US visitors.
 - **Configuración:** en GitHub, *Settings → Secrets and variables → Actions → Variables*, crea `SHEET_API_URL` con la URL del Apps Script (termina en `/exec`). Sin esa variable el sitio funciona igual, con los precios de `shop.ts` y sin enviar copia a la hoja.
 - **Actualizar el sitio:** se reconstruye solo cada día a las 6:00 (hora de Nicaragua), con el botón de la hoja (evento `sheet-updated`) o desde *Actions → Publicar en GitHub Pages → Run workflow*. Si la hoja no responde, la publicación se detiene y queda en línea la versión anterior.
 
-## Cómo cambiar precios, notas de cata y contacto
+## Cuentas de clientes (opcional)
+
+Los clientes pueden entrar con un enlace por correo (gratis) o un código por SMS (se paga por mensaje). Comprar sin cuenta sigue funcionando.
+Con sesión iniciada, el pedido se llena solo y "Mi cuenta" muestra sus pedidos y su estado desde la hoja.
+
+Para activarlo:
+1. En [console.firebase.google.com](https://console.firebase.google.com) crea un proyecto (sin Google Analytics) y agrega una **app web** (`</>`). Copia `apiKey`, `authDomain` y `projectId`.
+2. **Authentication → Sign-in method:** activa **Correo/contraseña** con **Vínculo de correo electrónico (acceso sin contraseña)**, y **Teléfono**. El teléfono requiere el plan Blaze (tarjeta); pon un presupuesto mensual en Google Cloud Billing.
+3. **Authentication → Settings → Authorized domains:** agrega `aortiz03.github.io` (y tu dominio propio si lo usas).
+4. En GitHub, *Settings → Secrets and variables → Actions → Variables*, crea `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN` y `FIREBASE_PROJECT_ID`.
+5. En el Apps Script de la hoja, agrega la propiedad `FIREBASE_API_KEY` (ver `sheets/README.md`).
+6. Vuelve a publicar (Actions → Publicar en GitHub Pages → Run workflow).
+
+
 
 Todo está en **`src/data/shop.ts`** (precios, productos, notas de cata, WhatsApp, correo, razón social).
 Las políticas están en **`src/data/policies.ts`**; escribe `[[texto]]` para marcar algo como "por confirmar".

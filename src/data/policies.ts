@@ -102,6 +102,7 @@ export const policies: Record<PolicyKey, { es: Policy; en: Policy }> = {
 <li>Usamos tus datos para procesar pedidos, darte atención y, sólo con tu permiso, enviarte promociones. Puedes darte de baja cuando quieras.</li>
 <li>No vendemos datos personales. Sólo los compartimos con empresas de mensajería y de pagos para completar tu pedido.</li>
 <li>Tu carrito se guarda únicamente en tu navegador hasta que nos envías el pedido.</li>
+<li>Si creas una cuenta, tu correo o número de teléfono se guarda en Firebase Authentication (Google) sólo para que puedas iniciar sesión. Para entrar con teléfono te enviamos un código por SMS. Puedes pedirnos que borremos tu cuenta en cualquier momento.</li>
 <li>Puedes pedir ver, corregir o eliminar tus datos escribiendo a ${contact.email} [[por confirmar]].</li>
 </ul>`,
     },
@@ -114,6 +115,7 @@ export const policies: Record<PolicyKey, { es: Policy; en: Policy }> = {
 <li>We use your data to process orders, provide support and, only with your consent, send promotions. You can unsubscribe at any time.</li>
 <li>We don’t sell personal data. We share it only with couriers and payment providers to complete your order.</li>
 <li>Your cart is stored only in your browser until you send us the order.</li>
+<li>If you create an account, your email or phone number is stored in Firebase Authentication (Google) only so you can sign in. To sign in by phone we text you a code. You can ask us to delete your account at any time.</li>
 <li>You can ask to see, correct or delete your data by writing to ${contact.email} [[to be confirmed]].</li>
 </ul>`,
     },
