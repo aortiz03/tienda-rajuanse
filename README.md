@@ -7,7 +7,7 @@ Online shop for RAJUANSE Estates: Spanish by default, English for US visitors.
 
 - Sólo la tienda (la página principal y la historia siguen en rajuanse.com): catálogo como portada, 8 páginas de producto, carrito y pedido, y 5 políticas (envíos, devoluciones, pagos, privacidad, términos), en español (`/`) e inglés (`/en/`).
 - Selector ES / EN y C$ / US$. Visitantes con el navegador en inglés de EE. UU. ven la versión en inglés automáticamente; su elección se recuerda.
-- El carrito se guarda en el navegador. El cliente envía el pedido por **WhatsApp** o **correo**; no hay pago con tarjeta todavía.
+- El carrito se guarda en el navegador. Para pagar, el cliente entra con su cuenta (paso 1), llena sus datos y la entrega (paso 2, se guardan para la próxima vez) y elige **tarjeta** o **efectivo contra entrega** (paso 3). El pago con tarjeta es un **marcador de posición**: valida el formato y confirma el pago sin cobrar nada; el número nunca sale del navegador y a la hoja sólo llega "PRUEBA sin cobro · Visa ···· 4242".
 - Todo lo que falta confirmar aparece en la página con la etiqueta **POR CONFIRMAR**.
 
 ## Conexión con la hoja de pedidos (Google Sheets)
@@ -19,12 +19,13 @@ Online shop for RAJUANSE Estates: Spanish by default, English for US visitors.
 
 ## Cuentas de clientes (opcional)
 
-Los clientes pueden entrar con un enlace por correo (gratis) o un código por SMS (se paga por mensaje). Comprar sin cuenta sigue funcionando.
+Para comprar hace falta una cuenta. En el carrito el cliente escribe su correo: si ya tiene cuenta entra con su contraseña o con un enlace por correo; si no, crea una con contraseña (o con el enlace). En "Mi cuenta" también puede entrar con un código por SMS (se paga por mensaje).
+Si Firebase no está configurado, el carrito avisa y deja seguir sin cuenta para que la tienda no quede bloqueada.
 Con sesión iniciada, el pedido se llena solo y "Mi cuenta" muestra sus pedidos y su estado desde la hoja.
 
 Para activarlo:
 1. En [console.firebase.google.com](https://console.firebase.google.com) crea un proyecto (sin Google Analytics) y agrega una **app web** (`</>`). Copia `apiKey`, `authDomain` y `projectId`.
-2. **Authentication → Sign-in method:** activa **Correo/contraseña** con **Vínculo de correo electrónico (acceso sin contraseña)**, y **Teléfono**. El teléfono requiere el plan Blaze (tarjeta); pon un presupuesto mensual en Google Cloud Billing.
+2. **Authentication → Sign-in method:** activa **Correo/contraseña** con **Vínculo de correo electrónico (acceso sin contraseña)**, y **Teléfono**. En **Authentication → Settings → User actions**, desactiva **Email enumeration protection** para que el carrito sepa si un correo ya tiene cuenta (si la dejas activada, todos ven primero "Crear cuenta" y quien ya tenga cuenta pasa a "Entrar" al intentarlo). El teléfono requiere el plan Blaze (tarjeta); pon un presupuesto mensual en Google Cloud Billing.
 3. **Authentication → Settings → Authorized domains:** agrega `aortiz03.github.io` (y tu dominio propio si lo usas).
 4. En GitHub, *Settings → Secrets and variables → Actions → Variables*, crea `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN` y `FIREBASE_PROJECT_ID`.
 5. En el Apps Script de la hoja, agrega la propiedad `FIREBASE_API_KEY` (ver `sheets/README.md`).

@@ -10,6 +10,10 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   signOut as fbSignOut,
+  fetchSignInMethodsForEmail,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   browserLocalPersistence,
   setPersistence,
   type User,
@@ -94,6 +98,31 @@ export async function sendPhoneCode(phone: string, buttonId: string): Promise<Co
   }
 }
 
+/**
+ * Cómo puede entrar este correo: 'password', 'link' (sólo enlace) o 'none'.
+ * Ojo: si en Firebase está activada la "protección contra la enumeración de
+ * correos" (Authentication → Settings), siempre responde 'none'; el pago lo
+ * resuelve igual porque "Crear cuenta" detecta el correo ya registrado.
+ */
+export async function emailStatus(email: string): Promise<'password' | 'link' | 'none'> {
+  const methods = await fetchSignInMethodsForEmail(getA(), email);
+  if (methods.includes('password')) return 'password';
+  if (methods.includes('emailLink')) return 'link';
+  return methods.length ? 'link' : 'none';
+}
+
+export async function signInPassword(email: string, password: string) {
+  await signInWithEmailAndPassword(getA(), email, password);
+}
+
+export async function createAccount(email: string, password: string) {
+  await createUserWithEmailAndPassword(getA(), email, password);
+}
+
+export async function sendReset(email: string) {
+  await sendPasswordResetEmail(getA(), email);
+}
+
 export function signOut() {
   return fbSignOut(getA());
 }
@@ -110,6 +139,10 @@ export function errorKey(e: unknown) {
   const code = (e as { code?: string })?.code || '';
   if (code.includes('invalid-verification-code') || code.includes('code-expired')) return 'acc.error.code';
   if (code.includes('invalid-phone-number') || code.includes('missing-phone-number')) return 'acc.error.phone';
+  if (code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login')) return 'co.err.password';
+  if (code.includes('weak-password')) return 'co.err.weak';
+  if (code.includes('email-already-in-use')) return 'co.err.inUse';
+  if (code.includes('invalid-email') || code.includes('missing-email')) return 'co.err.email';
   if (code.includes('too-many-requests') || code.includes('quota-exceeded')) return 'acc.error.tooMany';
   return 'acc.error';
 }

@@ -1,5 +1,5 @@
 // Datos del cliente guardados en este dispositivo (por cuenta) y pedidos desde la hoja.
-export type Profile = { name?: string; phone?: string; email?: string; address?: string; zone?: string };
+export type Profile = { name?: string; phone?: string; email?: string; idNumber?: string; address?: string; zone?: string };
 
 export function loadProfile(uid: string): Profile {
   try {
