@@ -83,9 +83,12 @@ function doPost(e) {
       shipping: 0,
       discount: 0,
       payment_method: order.payment_method,
+      payment_reference: order.payment_reference,
       ship_to: order.customer.address,
       customer_note: order.customer_note,
-      internal_note: `web_ref: ${order.web_ref} · zona: ${order.customer.zone} · enviado por: ${order.send_via} · subtotal web: ${order.subtotal}`,
+      internal_note:
+        `web_ref: ${order.web_ref} · zona: ${order.customer.zone} · enviado por: ${order.send_via} · subtotal web: ${order.subtotal}` +
+        (order.customer.id_number ? ` · cédula/pasaporte: ${order.customer.id_number}` : ''),
       created_at: now,
     });
     order.items.forEach((it) =>
@@ -109,7 +112,7 @@ function validateOrder_(b) {
   const webRef = clean_(b.web_ref, 40);
   if (!/^WEB-\d{8}-[A-Z0-9]{4,8}$/.test(webRef)) throw new Error('bad web_ref');
   const currency = b.currency === 'USD' ? 'USD' : 'NIO';
-  const pay = ['transferencia', 'efectivo', 'paypal'].indexOf(b.payment_method) >= 0 ? b.payment_method : 'otro';
+  const pay = ['tarjeta', 'efectivo', 'transferencia', 'compra_click', 'paypal'].indexOf(b.payment_method) >= 0 ? b.payment_method : 'otro';
   const known = {};
   readVariants_().forEach((v) => (known[v.sku] = v));
   const items = (Array.isArray(b.items) ? b.items : []).slice(0, 30).map((it) => {
@@ -127,7 +130,8 @@ function validateOrder_(b) {
   if (!name || !phone) throw new Error('name and phone required');
   return {
     web_ref: webRef,
-    send_via: b.send_via === 'email' ? 'email' : 'whatsapp',
+    send_via: ['email', 'web'].indexOf(b.send_via) >= 0 ? b.send_via : 'whatsapp',
+    payment_reference: clean_(b.payment_reference, 80),
     currency: currency,
     payment_method: pay,
     subtotal: Number(b.subtotal) || 0,
@@ -140,6 +144,7 @@ function validateOrder_(b) {
       preferred_language: c.preferred_language === 'en' ? 'en' : 'es',
       country: clean_(c.country, 2).toUpperCase(),
       address: clean_(c.address, 400),
+      id_number: clean_(c.id_number, 30),
       zone: ['managua', 'nicaragua', 'intl'].indexOf(c.zone) >= 0 ? c.zone : '',
     },
   };

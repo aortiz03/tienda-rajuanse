@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { products, lines, sizes, shippingZones, paymentMethods, contact, pricesIncludeIVA } from '../data/shop';
+import { products, lines, sizes, shippingZones, contact, pricesIncludeIVA } from '../data/shop';
 import { activeVariants, sheetUrl } from '../data/catalog';
 import { type Lang, t as tr, url, ui, asset } from '../i18n/ui';
 interface Props { lang: Lang }
@@ -50,40 +50,125 @@ const config = {
           <a class="continue" href={url(lang, 'shop')}>← {t('cart.continue')}</a>
         </div>
 
-        <form class="checkout" data-checkout novalidate>
-          <h2>{t('checkout.title')}</h2>
-          <p class="small">{t('checkout.lead')}</p>
-          <p class="acct" data-acct-out hidden><a href={url(lang, 'account')}>{t('acc.checkout.signin')} →</a></p>
-          <p class="acct in" data-acct-in hidden>✓ {t('acc.checkout.signedIn')}: <strong data-acct-who></strong></p>
-          <div class="field"><label for="c-name">{t('checkout.name')} *</label><input id="c-name" name="name" required autocomplete="name" /></div>
-          <div class="two">
-            <div class="field"><label for="c-phone">{t('checkout.phone')} *</label><input id="c-phone" name="phone" type="tel" required autocomplete="tel" /></div>
+        <div class="checkout" data-checkout>
+          <ol class="steps" aria-label={t('checkout.title')}>
+            <li data-dot="account">{t('co.step.account')}</li>
+            <li data-dot="details">{t('co.step.details')}</li>
+            <li data-dot="payment">{t('co.step.payment')}</li>
+          </ol>
+
+          <!-- 1. Cuenta -->
+          <section data-step="account">
+            <h2>{t('co.account.title')}</h2>
+            <p class="small" data-acc-lead>{t('co.account.lead')}</p>
+            <p class="notice" data-noauth hidden>{t('co.noAuth')}</p>
+            <div class="signed" data-signed hidden>
+              <p>✓ <span data-signed-who></span></p>
+              <div class="row">
+                <button type="button" class="btn btn-primary" data-signed-go>{t('co.continue')}</button>
+                <button type="button" class="linkish" data-signout>{t('co.otherAccount')}</button>
+              </div>
+            </div>
+            <form data-email-form novalidate>
+              <div class="field">
+                <label for="a-email" data-email-label>{t('co.email')} *</label>
+                <div class="inline">
+                  <input id="a-email" type="email" required autocomplete="email" inputmode="email" />
+                  <button class="btn btn-outline" type="submit" data-email-btn>{t('co.continue')}</button>
+                </div>
+              </div>
+            </form>
+            <div data-pw-panel hidden>
+              <p class="who"><span data-pw-msg></span> <button type="button" class="linkish" data-change-email>{t('co.change')}</button></p>
+              <form data-pw-form novalidate>
+                <div class="field">
+                  <label for="a-pw" data-pw-label>{t('co.password')}</label>
+                  <input id="a-pw" type="password" required minlength="6" />
+                </div>
+                <button class="btn btn-primary wide" type="submit" data-pw-btn>{t('co.signin')}</button>
+              </form>
+              <p class="or"><span>{t('co.or')}</span></p>
+              <button type="button" class="btn btn-outline wide" data-send-link>{t('co.sendLink')}</button>
+              <p class="forgot"><button type="button" class="linkish" data-forgot>{t('co.forgot')}</button></p>
+            </div>
+            <p class="ok" data-acc-msg hidden role="status"></p>
+            <p class="error" data-acc-err hidden role="alert"></p>
+          </section>
+
+          <!-- 2. Datos y envío -->
+          <form data-step="details" hidden novalidate>
+            <h2>{t('co.details.title')}</h2>
+            <p class="small" data-saved-note hidden>{t('co.details.saved')}</p>
+            <div class="field"><label for="c-name">{t('checkout.name')} *</label><input id="c-name" name="name" required autocomplete="name" /></div>
+            <div class="two">
+              <div class="field"><label for="c-phone">{t('checkout.phone')} *</label><input id="c-phone" name="phone" type="tel" required autocomplete="tel" placeholder="+505 8888 8888" /></div>
+              <div class="field"><label for="c-id">{t('co.idnumber')}</label><input id="c-id" name="idnumber" autocomplete="off" /><span class="hint">{t('co.idnumber.hint')}</span></div>
+            </div>
             <div class="field"><label for="c-email">{t('checkout.email')}</label><input id="c-email" name="email" type="email" autocomplete="email" /></div>
-          </div>
-          <div class="field">
-            <label for="c-zone">{t('checkout.zone')} *</label>
-            <select id="c-zone" name="zone" required>
-              {shippingZones.map((z) => <option value={z.id}>{z[lang]}</option>)}
-            </select>
-          </div>
-          <div class="field"><label for="c-address">{t('checkout.address')} *</label><textarea id="c-address" name="address" required autocomplete="street-address"></textarea></div>
-          <div class="field">
-            <label for="c-pay">{t('checkout.payment')}</label>
-            <select id="c-pay" name="payment">
-              {paymentMethods.map((m) => <option value={m.id}>{m[lang]}</option>)}
-            </select>
-          </div>
-          <div class="field"><label for="c-notes">{t('checkout.notes')}</label><textarea id="c-notes" name="notes"></textarea></div>
-          <label class="consent"><input type="checkbox" name="consent" required /> <span>{es ? 'Acepto los ' : 'I accept the '}<a href={url(lang, 'terms')}>{es ? 'términos' : 'terms'}</a>{es ? ' y la ' : ' and the '}<a href={url(lang, 'privacy')}>{es ? 'política de privacidad' : 'privacy policy'}</a>. *</span></label>
-          <p class="error" data-error hidden role="alert">{t('checkout.required')}</p>
-          <div class="send">
-            <button class="btn btn-primary" type="submit" data-via="whatsapp">{t('checkout.whatsapp')}</button>
-            <button class="btn btn-outline" type="submit" data-via="email">{t('checkout.email.send')}</button>
-          </div>
-          <p class="sent" data-sent hidden role="status">{t('order.sent')} <strong data-ref></strong>. {t('order.sentNote')}</p>
-          <p class="small safety">🔒 {t('checkout.safety')}</p>
-        </form>
+            <div class="field">
+              <label for="c-zone">{t('checkout.zone')} *</label>
+              <select id="c-zone" name="zone" required>
+                {shippingZones.map((z) => <option value={z.id}>{z[lang]}</option>)}
+              </select>
+            </div>
+            <div class="field"><label for="c-address">{t('checkout.address')} *</label><textarea id="c-address" name="address" required autocomplete="street-address"></textarea><span class="hint">{t('co.address.hint')}</span></div>
+            <div class="field"><label for="c-notes">{t('checkout.notes')}</label><textarea id="c-notes" name="notes"></textarea></div>
+            <label class="consent"><input type="checkbox" name="save" checked /> <span>{t('co.save')}</span></label>
+            <p class="error" data-error hidden role="alert">{t('checkout.required')}</p>
+            <div class="row">
+              <button type="button" class="linkish" data-back="account">← {t('co.back')}</button>
+              <button class="btn btn-primary" type="submit">{t('co.toPayment')}</button>
+            </div>
+          </form>
+
+          <!-- 3. Pago -->
+          <form data-step="payment" hidden novalidate>
+            <h2>{t('co.payment.title')}</h2>
+            <div class="shipto">
+              <p><strong>{t('co.shipTo')}:</strong> <span data-shipto></span></p>
+              <button type="button" class="linkish" data-back="details">{t('co.change')}</button>
+            </div>
+            <label class="opt"><input type="radio" name="pay" value="tarjeta" checked /> <span><strong>{t('co.pay.card')}</strong></span></label>
+            <div class="card" data-card>
+              <p class="test">{t('co.card.test')}</p>
+              <div class="field"><label for="k-name">{t('co.card.name')} *</label><input id="k-name" autocomplete="cc-name" data-cc required /></div>
+              <div class="field"><label for="k-num">{t('co.card.number')} *</label><input id="k-num" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" maxlength="23" data-cc required /></div>
+              <div class="two">
+                <div class="field"><label for="k-exp">{t('co.card.exp')} *</label><input id="k-exp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" data-cc required /></div>
+                <div class="field"><label for="k-cvv">{t('co.card.cvv')} *</label><input id="k-cvv" inputmode="numeric" autocomplete="cc-csc" maxlength="4" data-cc required /></div>
+              </div>
+            </div>
+            <label class="opt" data-cash-opt><input type="radio" name="pay" value="efectivo" /> <span><strong>{t('co.pay.cash')}</strong><br /><span class="small" data-cash-note>{t('co.pay.cashNote')}</span></span></label>
+            <div class="totals">
+              <div><span>{t('cart.subtotal')}</span><span data-pay-subtotal></span></div>
+              <div><span>{t('cart.shipping')}</span><span>{t('cart.shippingNote')}</span></div>
+              <div class="grand"><span>{t('co.total')}</span><strong data-pay-total></strong></div>
+            </div>
+            <label class="consent"><input type="checkbox" name="consent" required /> <span>{es ? 'Acepto los ' : 'I accept the '}<a href={url(lang, 'terms')}>{es ? 'términos' : 'terms'}</a>{es ? ' y la ' : ' and the '}<a href={url(lang, 'privacy')}>{es ? 'política de privacidad' : 'privacy policy'}</a>. *</span></label>
+            <input type="text" name="website" tabindex="-1" autocomplete="off" class="trap" aria-hidden="true" />
+            <p class="error" data-pay-error hidden role="alert"></p>
+            <div class="row">
+              <button type="button" class="linkish" data-back="details">← {t('co.back')}</button>
+              <button class="btn btn-primary" type="submit" data-pay-btn></button>
+            </div>
+            <p class="small safety">🔒 {t('checkout.safety')}</p>
+          </form>
+        </div>
       </div>
+
+      <section class="done" data-done hidden>
+        <p class="check" aria-hidden="true">✓</p>
+        <h2 data-done-title></h2>
+        <p data-done-note></p>
+        <p>{t('co.done.ref')}: <strong data-done-ref></strong></p>
+        <ul class="items done-items" data-done-items></ul>
+        <p class="small">{t('co.done.next')}</p>
+        <div class="row center">
+          <button type="button" class="btn btn-primary" data-done-wa>{t('co.done.whatsapp')}</button>
+          <a class="btn btn-outline" href={url(lang, 'account')}>{t('co.done.orders')}</a>
+          <a class="btn btn-outline" href={url(lang, 'shop')}>{t('cart.continue')}</a>
+        </div>
+      </section>
     </div>
   </section>
   <script type="application/json" id="cart-catalog" set:html={JSON.stringify(catalog)} />
@@ -104,6 +189,7 @@ const config = {
     align-items: start;
   }
   .layout[hidden],
+  .done[hidden],
   .empty[hidden] {
     display: none;
   }
@@ -249,6 +335,194 @@ const config = {
   }
   .safety {
     margin-top: 1rem;
+  }
+  .steps {
+    list-style: none;
+    display: flex;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0 0 1.4rem;
+    counter-reset: step;
+    font-family: var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .steps li {
+    flex: 1;
+    counter-increment: step;
+    padding-top: 0.5rem;
+    border-top: 3px solid rgba(74, 89, 53, 0.2);
+    color: rgba(74, 89, 53, 0.6);
+  }
+  .steps li::before {
+    content: counter(step) '. ';
+  }
+  .steps li.on {
+    border-color: var(--olive);
+    color: var(--olive-deep);
+  }
+  .steps li.past {
+    border-color: var(--olive);
+  }
+  [data-step][hidden],
+  [data-pw-panel][hidden],
+  [data-signed][hidden],
+  [data-email-form][hidden],
+  .card[hidden],
+  .notice[hidden],
+  .ok[hidden],
+  .small[hidden] {
+    display: none;
+  }
+  .inline {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .inline input {
+    flex: 1;
+    min-width: 0;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+  .row.center {
+    justify-content: center;
+  }
+  .wide {
+    width: 100%;
+  }
+  .linkish {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--olive);
+    text-decoration: underline;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.92rem;
+  }
+  .who {
+    margin-bottom: 0.8rem;
+  }
+  .or {
+    text-align: center;
+    margin: 0.8rem 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .forgot {
+    text-align: center;
+    margin-top: 0.6rem;
+  }
+  .ok,
+  .notice {
+    background: var(--cream);
+    border-left: 4px solid var(--olive);
+    padding: 0.7em 1em;
+    margin-top: 1rem;
+  }
+  .signed {
+    background: var(--cream);
+    padding: 0.8em 1em;
+    border-radius: var(--radius);
+  }
+  .signed .row {
+    margin-top: 0.4rem;
+  }
+  .hint {
+    display: block;
+    font-size: 0.82rem;
+    margin-top: 0.25rem;
+    opacity: 0.85;
+  }
+  .shipto {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--cream);
+    padding: 0.7em 1em;
+    border-radius: var(--radius);
+    margin-bottom: 1.2rem;
+    font-size: 0.95rem;
+  }
+  .opt {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(74, 89, 53, 0.35);
+    border-radius: var(--radius);
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+  }
+  .opt input {
+    width: auto;
+    margin-top: 0.3em;
+  }
+  .opt.off {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .card {
+    padding: 0 0 0.6rem 0;
+  }
+  .test {
+    font-size: 0.85rem;
+    background: #fff4d6;
+    border-left: 4px solid #c99a2e;
+    padding: 0.6em 0.9em;
+    margin: 0.2rem 0 1rem;
+  }
+  .grand {
+    border-top: 1px solid rgba(74, 89, 53, 0.25);
+    margin-top: 0.3rem;
+    padding-top: 0.6rem !important;
+  }
+  .trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+  }
+  .done {
+    max-width: 640px;
+    margin: 1rem auto 0;
+    text-align: center;
+    background: var(--cream-light);
+    border-radius: var(--radius);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .done .check {
+    width: 56px;
+    height: 56px;
+    line-height: 56px;
+    margin: 0 auto 0.8rem;
+    border-radius: 999px;
+    background: var(--olive);
+    color: var(--cream-light);
+    font-size: 1.6rem;
+  }
+  .done-items {
+    text-align: left;
+    margin: 1rem 0;
+  }
+  .done-items :global(li) {
+    grid-template-columns: 1fr auto !important;
+    padding: 0.6rem 0 !important;
   }
   @media (max-width: 860px) {
     .layout {
