@@ -12,8 +12,16 @@ script (`Code.gs`), which connects it to the shop in two directions:
   or right away from the sheet's **Tienda → Publicar cambios en la web** menu.
   A blank price keeps the website's current price; `active = no` hides that bag.
 
-The web address of the script only shares prices and availability. Customer and
-order data can be added through it but never read back.
+The web address of the script shares prices and availability with everyone.
+Customer and order data can only be read back by a signed-in customer, and only
+their own orders.
+
+- **Customer accounts (optional for customers).** A customer who signs in on the
+  site with their email or phone sees their past orders and gets checkout pre-filled.
+  The script checks every sign-in with Firebase. The first time someone signs in, their
+  account is linked to an existing customer row only if the email or phone they
+  *verified* matches it. What someone types in the form is never enough to see
+  someone else's orders. Linked rows get `auth_uid` and `auth_provider` filled in.
 
 ## One-time setup (about 20 minutes)
 
@@ -38,7 +46,12 @@ order data can be added through it but never read back.
    - Back in Apps Script, open **Project Settings** (gear icon) → **Script Properties →
      Add script property**. Name: `GITHUB_TOKEN`, value: the token. Save.
    - Reload the sheet. A **Tienda** menu appears next to Help.
-6. **Test it.** Place a small order on the website. Within a few seconds it should
+6. **Turn on customer sign-in** (after Firebase is set up for the website).
+   In the Firebase console, open **Project settings → General** and copy the
+   **Web API key**. In Apps Script, add a script property named `FIREBASE_API_KEY`
+   with that value. Without it, the site still takes guest orders, but
+   "my orders" stays empty.
+7. **Test it.** Place a small order on the website. Within a few seconds it should
    appear in the `orders` tab. Change a price, use **Tienda → Publicar cambios en la
    web**, and check the site after 2 to 3 minutes.
 
@@ -54,4 +67,7 @@ order data can be added through it but never read back.
   button, even if they never send the WhatsApp message. Mark those `cancelado`.
 - **Spam protection:** the script checks every product code, quantity and price,
   ignores bot submissions, and accepts at most 30 orders every 10 minutes.
+- **Sheets made before sign-in was added:** the script adds the `auth_uid` and
+  `auth_provider` columns to `customers` by itself the first time someone signs in.
+- **An expired sign-in never loses an order.** The order is saved as a guest order instead.
 - **The token expires** after a year. Make a new one and replace `GITHUB_TOKEN`.
