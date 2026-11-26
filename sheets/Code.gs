@@ -11,6 +11,9 @@
  *     solo a customers, orders y order_items.
  *  3. Menú "Tienda" → "Publicar cambios en la web": vuelve a publicar
  *     la web con los precios actuales de la hoja.
+ *  4. Clientes con cuenta (Firebase, por correo o teléfono):
+ *     GET ?action=my_orders&id_token=… devuelve sólo los pedidos de
+ *     ese cliente; los pedidos con id_token se ligan a su cuenta.
  */
 
 const REPO = 'aortiz03/tienda-rajuanse';
@@ -22,6 +25,7 @@ const MAX_ORDERS_PER_10_MIN = 30; // freno contra envíos masivos
 function doGet(e) {
   const action = e && e.parameter && e.parameter.action;
   if (action === 'variants') return json_({ variants: readVariants_() });
+  if (action === 'my_orders') return json_(myOrders_(e.parameter.id_token));
   return json_({ ok: true, info: 'RAJUANSE sheet API' });
 }
 
@@ -57,7 +61,13 @@ function doPost(e) {
     if (existing) return json_({ ok: true, order_number: existing, duplicate: true });
 
     const now = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd HH:mm');
-    const customerId = findOrCreateCustomer_(order.customer, now);
+    let customerId = null;
+    if (body.id_token) {
+      // Si el token no vale (p. ej. caducado), el pedido se guarda igual, como invitado.
+      const user = lookupUser_(body.id_token);
+      if (user) customerId = findAuthCustomer_(user) || createCustomer_(order.customer, now, user);
+    }
+    if (!customerId) customerId = findOrCreateCustomer_(order.customer, now);
     const orderNumber = nextOrderNumber_();
 
     writeRow_('orders', {
@@ -131,12 +141,19 @@ function validateOrder_(b) {
   };
 }
 
+function digits_(s) {
+  return String(s || '').replace(/\D/g, '');
+}
+
 function findOrCreateCustomer_(c, now) {
-  const digits = (s) => String(s || '').replace(/\D/g, '');
-  const phone = digits(c.whatsapp_phone);
-  const rows = readTable_('customers');
-  const match = rows.find((r) => phone.length >= 7 && digits(r.whatsapp_phone) === phone);
+  const phone = digits_(c.whatsapp_phone);
+  const match = readTable_('customers').find((r) => phone.length >= 7 && digits_(r.whatsapp_phone) === phone);
   if (match) return String(match.customer_id);
+  return createCustomer_(c, now, null);
+}
+
+function createCustomer_(c, now, user) {
+  const rows = readTable_('customers');
   let max = 0;
   rows.forEach((r) => {
     const m = /^C-(\d+)$/.exec(String(r.customer_id || ''));
@@ -155,8 +172,109 @@ function findOrCreateCustomer_(c, now) {
     address: c.address,
     notes: 'Creado desde la web',
     created_at: now,
+    auth_uid: user ? user.uid : '',
+    auth_provider: user ? user.provider : '',
   });
   return id;
+}
+
+// ---------- Cuentas de clientes (Firebase) ----------------------------
+
+/**
+ * Comprueba el id_token con Firebase. Devuelve {uid, provider, email, phone}
+ * con sólo el correo o teléfono VERIFICADOS, o null si el token no vale.
+ */
+function lookupUser_(idToken) {
+  const key = PropertiesService.getScriptProperties().getProperty('FIREBASE_API_KEY');
+  if (!key || !idToken || String(idToken).length > 4096) return null;
+  const res = UrlFetchApp.fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + encodeURIComponent(key), {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify({ idToken: String(idToken) }),
+    muteHttpExceptions: true,
+  });
+  if (res.getResponseCode() !== 200) return null;
+  const u = (JSON.parse(res.getContentText()).users || [])[0];
+  if (!u || !u.localId || u.disabled) return null;
+  return {
+    uid: u.localId,
+    provider: u.phoneNumber ? 'phone' : 'email',
+    phone: u.phoneNumber || '',
+    email: u.email && u.emailVerified ? String(u.email).toLowerCase() : '',
+  };
+}
+
+/**
+ * Cliente de una cuenta: primero por auth_uid; si no, por el teléfono o
+ * correo verificados de la cuenta (nunca por lo escrito en el formulario),
+ * y en ese caso liga la fila a la cuenta. Devuelve el id o null.
+ */
+function findAuthCustomer_(user) {
+  ensureColumns_('customers', ['auth_uid', 'auth_provider']);
+  const rows = readTable_('customers');
+  const byUid = rows.find((r) => String(r.auth_uid || '') === user.uid);
+  if (byUid) return String(byUid.customer_id);
+  const phone = digits_(user.phone);
+  const match = rows.find(
+    (r) =>
+      !String(r.auth_uid || '') &&
+      ((phone.length >= 7 && digits_(r.whatsapp_phone) === phone) ||
+        (user.email && String(r.email || '').trim().toLowerCase() === user.email)),
+  );
+  if (!match) return null;
+  updateRow_('customers', 'customer_id', match.customer_id, { auth_uid: user.uid, auth_provider: user.provider });
+  return String(match.customer_id);
+}
+
+function myOrders_(idToken) {
+  const user = lookupUser_(idToken);
+  if (!user) return { ok: false, error: 'auth' };
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  let customerId;
+  try {
+    customerId = findAuthCustomer_(user);
+  } finally {
+    lock.releaseLock();
+  }
+  if (!customerId) return { ok: true, customer: null, orders: [] };
+
+  const c = readTable_('customers').find((r) => String(r.customer_id) === customerId) || {};
+  const items = readTable_('order_items');
+  const orders = readTable_('orders')
+    .filter((o) => String(o.customer_id) === customerId)
+    .map((o) => ({
+      order_number: String(o.order_number),
+      web_ref: (/web_ref: (WEB-[A-Z0-9-]+)/.exec(String(o.internal_note || '')) || [])[1] || '',
+      created_at: dateText_(o.created_at),
+      status: String(o.status || ''),
+      currency: String(o.currency || ''),
+      subtotal: num_(o.subtotal),
+      shipping: num_(o.shipping),
+      discount: num_(o.discount),
+      total: num_(o.total),
+      items: items
+        .filter((i) => String(i.order_number) === String(o.order_number))
+        .map((i) => ({
+          sku: String(i.sku || ''),
+          product: String(i['product (auto)'] || ''),
+          description: String(i['size and grind (auto)'] || ''),
+          quantity: num_(i.quantity),
+          unit_price: num_(i.unit_price),
+          line_total: num_(i.line_total),
+        })),
+    }))
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0));
+  return {
+    ok: true,
+    customer: {
+      full_name: plain_(c.full_name),
+      whatsapp_phone: plain_(c.whatsapp_phone),
+      email: plain_(c.email),
+      address: plain_(c.address),
+    },
+    orders: orders,
+  };
 }
 
 function findOrderByWebRef_(ref) {
@@ -247,6 +365,30 @@ function writeRow_(name, data) {
   return row;
 }
 
+/** Cambia celdas de la fila cuya columna keyCol vale keyVal. */
+function updateRow_(name, keyCol, keyVal, data) {
+  const sh = sheet_(name);
+  const values = sh.getDataRange().getValues();
+  const head = values[0].map((h) => String(h).trim());
+  const k = head.indexOf(keyCol);
+  const idx = values.findIndex((r, i) => i > 0 && String(r[k]) === String(keyVal));
+  if (idx < 1) return;
+  Object.keys(data).forEach((key) => {
+    const col = head.indexOf(key) + 1;
+    if (col > 0) sh.getRange(idx + 1, col).setValue(safe_(data[key]));
+  });
+}
+
+/** Añade al final los encabezados que falten (hojas creadas antes). */
+function ensureColumns_(name, cols) {
+  const sh = sheet_(name);
+  const head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map((h) => String(h).trim());
+  let next = head.length;
+  cols.forEach((c) => {
+    if (head.indexOf(c) < 0) sh.getRange(1, ++next, 1, 1).setValue(c);
+  });
+}
+
 function sheet_(name) {
   const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
   if (!sh) throw new Error('Falta la pestaña ' + name);
@@ -266,6 +408,20 @@ function toNumberOrNull_(v) {
   if (v === '' || v == null) return null;
   const n = Number(v);
   return isFinite(n) ? n : null;
+}
+
+function num_(v) {
+  const n = Number(v);
+  return v === '' || v == null || !isFinite(n) ? 0 : n;
+}
+
+/** Quita el apóstrofo que safe_ pone delante de textos como "+505…". */
+function plain_(v) {
+  return String(v == null ? '' : v).replace(/^'/, '');
+}
+
+function dateText_(v) {
+  return v instanceof Date ? Utilities.formatDate(v, TZ, 'yyyy-MM-dd HH:mm') : String(v || '');
 }
 
 function json_(obj) {
